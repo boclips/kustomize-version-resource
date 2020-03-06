@@ -1,0 +1,3 @@
+git pull --rebase
+make
+git push
