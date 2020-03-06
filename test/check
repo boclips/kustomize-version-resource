@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -e
+
+cwd="$(cd "$(dirname "$0")" && pwd)"
+uri="git@github.com:boclips/backoffice.git"
+private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
+test_name=kustomize-version-resource-test-check
+commit_with_150_version=ba1ad01e96bc2c3cb0236fd66f5f94b58ed84801
+
+input="$(
+jq \
+    --null-input \
+    --arg uri "$uri" \
+    --arg branch "$commit_with_150_version" \
+    --arg private_key "$private_key" \
+    '{ source: { uri: $uri, branch: $branch, private_key: $private_key }, version: { tag: "140" } }'
+)"
+
+expected_output="$(cat <<EOF
+[
+  { "version": "140" },
+  { "version": "141" },
+  { "version": "142" },
+  { "version": "143" },
+  { "version": "144" },
+  { "version": "145" },
+  { "version": "146" },
+  { "version": "147" },
+  { "version": "148" },
+  { "version": "149" },
+  { "version": "150" }
+]
+EOF
+)"
+
+(
+cd "$cwd/.."
+docker build --tag $test_name .
+output="$(
+docker run \
+    --interactive \
+    --entrypoint=/opt/resource/check \
+    $test_name \
+    <<< "$input"
+)"
+
+comparable_actual_output="$(jq <<< "$output")"
+comparable_expected_output="$(jq <<< "$expected_output")"
+if [ "$comparable_actual_output" == "$comparable_expected_output" ]
+then
+    echo "Test passed"
+    exit 0
+else
+    echo "Test failed"
+    echo
+    echo "Expected output:"
+    echo "$comparable_expected_output"
+    echo
+    echo "Actual output:"
+    echo "$comparable_actual_output"
+    echo
+    exit 1
+fi
+)

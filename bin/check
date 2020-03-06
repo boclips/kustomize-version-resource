@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -e
+
+payload="$(cat /dev/stdin)"
+
+get () {
+    jq --raw-output \
+        ".$1.$2" \
+        <<< "$payload"
+}
+
+uri="$(get source uri)"
+private_key="$(get source private_key)"
+path_to_kustomize_yaml=k8s/base/kustomization.yaml
+input_tag="$(get version tag)"
+
+mkdir ~/.ssh
+ssh-keyscan github.com \
+    > ~/.ssh/known_hosts
+echo "$private_key" > ~/.ssh/id_rsa
+
+chmod 0400 ~/.ssh/id_rsa
+
+[ -d /tmp/repo ] \
+    || git clone "$uri" /tmp/repo
+cd /tmp/repo
+git pull > /dev/null
+
+current_tag="$(
+grep newTag "/tmp/repo/$path_to_kustomize_yaml" \
+    | sed 's/.*newTag:[^0-9]*\([0-9]*\).*/\1/'
+    )"
+
+jq \
+    --null-input \
+    "[range($input_tag;$current_tag+1) | { version: . | tostring }]"
