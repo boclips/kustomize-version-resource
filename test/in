@@ -3,6 +3,9 @@
 set -e
 
 cwd="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck disable=SC1090
+
+source "$cwd/common"
 uri="git@github.com:boclips/backoffice.git"
 private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
 commit_with_149_version=870d3fd6bddc4d04f325e25b6eb3849f099e2565
@@ -39,32 +42,7 @@ expected_output="$(cat <<EOF
 EOF
 )"
 
-(
-cd "$cwd/.."
-image_id="$(docker build --quiet .)"
-output="$(
-docker run \
-    --interactive \
-    --entrypoint=/opt/resource/in \
-    "$image_id" \
-    <<< "$input"
-)"
-
-comparable_actual_output="$(jq <<< "$output")"
-comparable_expected_output="$(jq <<< "$expected_output")"
-if [ "$comparable_actual_output" == "$comparable_expected_output" ]
-then
-    echo "Test passed"
-    exit 0
-else
-    echo "Test failed"
-    echo
-    echo "Expected output:"
-    echo "$comparable_expected_output"
-    echo
-    echo "Actual output:"
-    echo "$comparable_actual_output"
-    echo
-    exit 1
-fi
-)
+echo "in echoes version"
+assert_equal_json \
+    "$expected_output" \
+    "$(run "$cwd/.." /opt/resource/in "$input")"
