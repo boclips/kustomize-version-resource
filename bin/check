@@ -2,18 +2,18 @@
 
 set -e
 
+cwd="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck disable=SC1090
+source "$cwd/common"
+
 payload="$(cat /dev/stdin)"
 
-get () {
-    jq --raw-output \
-        ".$1.$2" \
-        <<< "$payload"
-}
-
-uri="$(get source uri)"
-private_key="$(get source private_key)"
-path_to_kustomize_yaml=k8s/base/kustomization.yaml
-input_tag="$(get version tag)"
+uri="$(get source uri <<< "$payload")"
+private_key="$(get source private_key <<< "$payload")"
+kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
+[ "$kustomization_yaml_path" == null ] \
+    && kustomization_yaml_path=k8s/base/kustomization.yaml
+input_tag="$(get version tag <<< "$payload")"
 
 mkdir ~/.ssh
 ssh-keyscan github.com \
@@ -29,7 +29,7 @@ cd /tmp/repo
 git pull --quiet
 
 current_tag="$(
-grep newTag "/tmp/repo/$path_to_kustomize_yaml" \
+grep newTag "/tmp/repo/$kustomization_yaml_path" \
     | sed 's/.*newTag:[^0-9]*\([0-9]*\).*/\1/'
     )"
 next_tag=$(( current_tag + 1 ))

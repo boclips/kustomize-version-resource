@@ -6,6 +6,4 @@ RUN apk update \
     jq \
     openssh
 RUN mkdir /opt/resource
-ADD bin/check /opt/resource/check
-ADD bin/in /opt/resource/in
-ADD bin/out /opt/resource/out
+ADD bin/* /opt/resource/

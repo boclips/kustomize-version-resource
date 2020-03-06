@@ -3,20 +3,55 @@
 set -e
 
 cwd="$(cd "$(dirname "$0")" && pwd)"
-uri="git@github.com:boclips/backoffice.git"
-private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
-commit_with_150_version=ba1ad01e96bc2c3cb0236fd66f5f94b58ed84801
+# shellcheck disable=SC1090
+source "$cwd/common"
 
-input="$(
+backoffice_uri="git@github.com:boclips/backoffice.git"
+backoffice_private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
+backoffice_commit_with_150_version=ba1ad01e96bc2c3cb0236fd66f5f94b58ed84801
+
+frontend_uri="git@github.com:boclips/frontend.git"
+frontend_private_key="$(bo show credential concourse-main boclips.frontend repo-key)"
+frontend_commit_with_9_version=08d9a42b628a3c09ea8e42f915d69c97946170d7
+
+backoffice_input="$(
 jq \
     --null-input \
-    --arg uri "$uri" \
-    --arg branch "$commit_with_150_version" \
-    --arg private_key "$private_key" \
-    '{ source: { uri: $uri, branch: $branch, private_key: $private_key }, version: { tag: "140" } }'
+    --arg uri "$backoffice_uri" \
+    --arg branch "$backoffice_commit_with_150_version" \
+    --arg private_key "$backoffice_private_key" \
+    '{
+       source: {
+         uri: $uri,
+         branch: $branch,
+         private_key: $private_key
+       },
+       version: {
+         tag: "140"
+       }
+     }'
 )"
 
-expected_output="$(cat <<EOF
+frontend_input="$(
+jq \
+    --null-input \
+    --arg uri "$frontend_uri" \
+    --arg branch "$frontend_commit_with_9_version" \
+    --arg private_key "$frontend_private_key" \
+    '{
+       source: {
+         uri: $uri,
+         branch: $branch,
+         private_key: $private_key,
+         kustomization_yaml_path: "k8s/boclips/base/kustomization.yaml"
+       },
+       version: {
+         tag: "1"
+       }
+     }'
+)"
+
+expected_backoffice_output="$(cat <<EOF
 [
   { "version": "140" },
   { "version": "141" },
@@ -33,32 +68,27 @@ expected_output="$(cat <<EOF
 EOF
 )"
 
-(
-cd "$cwd/.."
-image_id="$(docker build --quiet .)"
-output="$(
-docker run \
-    --interactive \
-    --entrypoint=/opt/resource/check \
-    "$image_id" \
-    <<< "$input"
+expected_frontend_output="$(cat <<EOF
+[
+  { "version": "1" },
+  { "version": "2" },
+  { "version": "3" },
+  { "version": "4" },
+  { "version": "5" },
+  { "version": "6" },
+  { "version": "7" },
+  { "version": "8" },
+  { "version": "9" }
+]
+EOF
 )"
 
-comparable_actual_output="$(jq <<< "$output")"
-comparable_expected_output="$(jq <<< "$expected_output")"
-if [ "$comparable_actual_output" == "$comparable_expected_output" ]
-then
-    echo "Test passed"
-    exit 0
-else
-    echo "Test failed"
-    echo
-    echo "Expected output:"
-    echo "$comparable_expected_output"
-    echo
-    echo "Actual output:"
-    echo "$comparable_actual_output"
-    echo
-    exit 1
-fi
-)
+echo "check repo without explicit kustomization.yaml path"
+assert_equal_json \
+    "$expected_backoffice_output" \
+    "$(run "$cwd/.." /opt/resource/check "$backoffice_input")"
+
+echo "check repo with explicit kustomization.yaml path"
+assert_equal_json \
+    "$expected_frontend_output" \
+    "$(run "$cwd/.." /opt/resource/check "$frontend_input")"
