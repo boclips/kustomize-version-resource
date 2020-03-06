@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -e
+
+payload="$(cat /dev/stdin)"
+
+get () {
+    jq --raw-output \
+        ".$1.$2" \
+        <<< "$payload"
+}
+
+input_tag="$(get version tag)"
+
+jq \
+    --null-input \
+    --arg tag "$input_tag" \
+    '{ version: $tag, metadata: [{ name: "tag", value: $tag }] }'

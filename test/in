@@ -5,31 +5,37 @@ set -e
 cwd="$(cd "$(dirname "$0")" && pwd)"
 uri="git@github.com:boclips/backoffice.git"
 private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
-commit_with_150_version=ba1ad01e96bc2c3cb0236fd66f5f94b58ed84801
+commit_with_149_version=870d3fd6bddc4d04f325e25b6eb3849f099e2565
 
 input="$(
 jq \
     --null-input \
     --arg uri "$uri" \
-    --arg branch "$commit_with_150_version" \
+    --arg branch "$commit_with_149_version" \
     --arg private_key "$private_key" \
-    '{ source: { uri: $uri, branch: $branch, private_key: $private_key }, version: { tag: "140" } }'
+    '{
+       source: {
+         uri: $uri,
+         branch: $branch,
+         private_key: $private_key
+       },
+       version: {
+         tag: "149"
+       },
+       params: {}
+     }'
 )"
 
 expected_output="$(cat <<EOF
-[
-  { "version": "140" },
-  { "version": "141" },
-  { "version": "142" },
-  { "version": "143" },
-  { "version": "144" },
-  { "version": "145" },
-  { "version": "146" },
-  { "version": "147" },
-  { "version": "148" },
-  { "version": "149" },
-  { "version": "150" }
-]
+{
+  "version": "149",
+  "metadata": [
+    {
+      "name": "tag",
+      "value": "149"
+    }
+  ]
+}
 EOF
 )"
 
@@ -39,7 +45,7 @@ image_id="$(docker build --quiet .)"
 output="$(
 docker run \
     --interactive \
-    --entrypoint=/opt/resource/check \
+    --entrypoint=/opt/resource/in \
     "$image_id" \
     <<< "$input"
 )"

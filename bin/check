@@ -17,7 +17,8 @@ input_tag="$(get version tag)"
 
 mkdir ~/.ssh
 ssh-keyscan github.com \
-    > ~/.ssh/known_hosts
+    > ~/.ssh/known_hosts \
+    2> /dev/null
 echo "$private_key" > ~/.ssh/id_rsa
 
 chmod 0400 ~/.ssh/id_rsa
@@ -25,13 +26,14 @@ chmod 0400 ~/.ssh/id_rsa
 [ -d /tmp/repo ] \
     || git clone "$uri" /tmp/repo
 cd /tmp/repo
-git pull > /dev/null
+git pull --quiet
 
 current_tag="$(
 grep newTag "/tmp/repo/$path_to_kustomize_yaml" \
     | sed 's/.*newTag:[^0-9]*\([0-9]*\).*/\1/'
     )"
+next_tag=$(( current_tag + 1 ))
 
 jq \
     --null-input \
-    "[range($input_tag;$current_tag+1) | { version: . | tostring }]"
+    "[range($input_tag;$next_tag) | { version: . | tostring }]"
