@@ -2,7 +2,7 @@
 
 run () {
     (
-    image_id="$(docker build --quiet $1)"
+    image_id="$(docker build --quiet "$1")"
     docker run \
         --interactive \
         --entrypoint="$2" \

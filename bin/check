@@ -15,16 +15,7 @@ kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
     && kustomization_yaml_path=k8s/base/kustomization.yaml
 input_tag="$(get version tag <<< "$payload")"
 
-mkdir ~/.ssh
-ssh-keyscan github.com \
-    > ~/.ssh/known_hosts \
-    2> /dev/null
-echo "$private_key" > ~/.ssh/id_rsa
-
-chmod 0400 ~/.ssh/id_rsa
-
-[ -d /tmp/repo ] \
-    || git clone "$uri" /tmp/repo
+clone "$uri" /tmp/repo "$private_key"
 cd /tmp/repo
 git pull --quiet
 

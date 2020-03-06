@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -e
+
+cwd="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck disable=SC1090
+source "$cwd/common"
+
+export GIT_COMMITTER_NAME=Kustomizer
+export GIT_COMMITTER_EMAIL=engineering@boclips.com
+
+payload="$(cat /dev/stdin)"
+uri="$(get source uri <<< "$payload")"
+private_key="$(get source private_key <<< "$payload")"
+kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
+[ "$kustomization_yaml_path" == null ] \
+    && kustomization_yaml_path=k8s/base/kustomization.yaml
+
+clone "$uri" /tmp/repo "$private_key"
+
+cd /tmp/repo
+
+current_version="$("$cwd/parse-version" "$kustomization_yaml_path")"
+app="$("$cwd/parse-app" "$kustomization_yaml_path")"
+bumped_version=$(( current_version + 1 ))
+
+cd "$(dirname "$kustomization_yaml_path")"
+
+kustomize edit set image "app=eu.gcr.io/boclips-prod/boclips/$app:$bumped_version"
+kustomize edit add annotation --force "boclips-version:$bumped_version"
+
+git \
+  commit \
+  --quiet \
+  --all \
+  --author="$GIT_COMMITTER_NAME <$GIT_COMMITTER_EMAIL>" \
+  --message="$(cat <<EOF
+Bump version to $bumped_version
+
+[ci skip]
+EOF
+)"
+
+git push --quiet
+
+jq \
+    --null-input \
+    --arg tag "$bumped_version" \
+    '{ version: $tag, metadata: [{ name: "tag", value: $tag }] }'

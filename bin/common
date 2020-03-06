@@ -1,3 +1,20 @@
 get () {
     jq --raw-output ".$1.$2"
 }
+
+clone () {
+    uri="$1"
+    destination="$2"
+    private_key="$3"
+
+    mkdir ~/.ssh || true
+    ssh-keyscan github.com \
+        > ~/.ssh/known_hosts \
+        2> /dev/null
+    echo "$private_key" > ~/.ssh/id_rsa
+
+    chmod 0400 ~/.ssh/id_rsa
+
+    [ -d /tmp/repo ] \
+        || git clone "$uri" "$destination"
+}

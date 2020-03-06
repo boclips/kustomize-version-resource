@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ -z "$1" ]
+then
+    echo "Usage: parse-app PATH_TO_KUSTOMIZE_YAML"
+    exit 1
+fi
+
+grep 'eu\.gcr\.io/boclips-prod/boclips' "$1" \
+    | sed 's%.*eu\.gcr\.io/boclips-prod/boclips/%%'

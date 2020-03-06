@@ -4,8 +4,8 @@ set -e
 
 cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
-
 source "$cwd/common"
+
 uri="git@github.com:boclips/backoffice.git"
 private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
 commit_with_149_version=870d3fd6bddc4d04f325e25b6eb3849f099e2565
