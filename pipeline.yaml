@@ -1,0 +1,59 @@
+---
+jobs:
+
+- name: build
+  plan:
+  - get: source
+  - put: version
+    params:
+      bump: minor
+  - task: build-image
+    privileged: true
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: vito/oci-build-task
+          tag: "0.1.0"
+      inputs:
+      - name: source
+      outputs:
+      - name: image
+      run:
+        path: build
+      caches:
+      - path: cache
+      params:
+        CONTEXT: source
+  - put: dockerhub
+    params:
+      image: image/image.tar
+      additional_tags: version/version
+
+resources:
+
+- name: source
+  type: git
+  icon: github-circle
+  source:
+    branch: master
+    uri: https://github.com/boclips/kustomize-version-resource.git
+
+- name: version
+  type: semver
+  icon: github-circle
+  source:
+    driver: git
+    uri: git@github.com:boclips/versions.git
+    branch: master
+    file: docker-image-kustomize-version-resource
+    private_key: ((versions.repo-key))
+
+- name: dockerhub
+  type: registry-image
+  icon: docker
+  source:
+    repository: boclipsconcourse/kustomize-version-resource
+    username: boclipsconcourse
+    password: ((docker-hub.password))
