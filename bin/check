@@ -17,7 +17,6 @@ kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 input_tag="$(get version tag <<< "$payload")"
 
 clone "$uri" /tmp/repo "$private_key"
-git -C /tmp/repo pull --quiet
 git -C /tmp/repo checkout "$branch"
 
 current_tag="$(
