@@ -20,6 +20,6 @@ clone () {
 
     [ -d "$destination" ] \
         || git clone "$uri" "$destination"
-    git -C "$destination" fetch
-    git -C "$destination" checkout "$branch"
+    git -C "$destination" fetch --quiet
+    git -C "$destination" checkout --quiet "$branch"
 }

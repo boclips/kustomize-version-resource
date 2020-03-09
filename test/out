@@ -25,8 +25,7 @@ jq \
      }'
 )"
 
-expected_output="$(cat <<EOF
-{
+expected_output='{
   "version": "124",
   "metadata": [
     {
@@ -34,13 +33,11 @@ expected_output="$(cat <<EOF
       "value": "124"
     }
   ]
-}
-EOF
-)"
+}'
 
 image_id="$(docker build --quiet "$cwd/..")"
 docker_output="$(
-# shellcheck disable=SC1004
+# shellcheck disable=SC1004,SC2016
 docker run \
     --interactive \
     --entrypoint=bash \

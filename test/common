@@ -31,9 +31,9 @@ assert_runs_twice () {
 }
 
 assert_equal_json () {
-    comparable_actual_output="$(jq <<< "$2")"
     comparable_expected_output="$(jq <<< "$1")"
-    if [ "$comparable_actual_output" == "$comparable_expected_output" ]
+    comparable_actual_output="$(jq <<< "$2")"
+    if [ "$comparable_expected_output" == "$comparable_actual_output" ]
     then
         echo "Test passed"
     else

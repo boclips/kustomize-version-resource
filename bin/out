@@ -16,7 +16,7 @@ kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 [ "$kustomization_yaml_path" == null ] \
     && kustomization_yaml_path=k8s/base/kustomization.yaml
 
-clone "$uri" /tmp/repo "$private_key"
+clone "$uri" /tmp/repo master "$private_key"
 
 cd /tmp/repo
 
