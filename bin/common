@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 get () {
-    jq --raw-output ".$1.$2"
+    jq --raw-output ".$1.$2 // empty"
 }
 
 clone () {

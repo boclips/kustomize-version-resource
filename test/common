@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+cwd="$(cd "$(dirname "$0")" && pwd)"
+
 create () {
-    image_id="$(docker build --quiet "$1")"
+    image_id="$(cat "$cwd/../test_image_id")"
     docker create \
         --interactive \
         --entrypoint="$2" \
@@ -44,6 +46,23 @@ assert_equal_json () {
         echo
         echo "Actual output:"
         echo "$comparable_actual_output"
+        echo
+        exit 1
+    fi
+}
+
+assert_equal () {
+    if [ "$1" == "$2" ]
+    then
+        echo "Test passed"
+    else
+        echo "Test failed"
+        echo
+        echo "Expected output:"
+        echo "$1"
+        echo
+        echo "Actual output:"
+        echo "$2"
         echo
         exit 1
     fi

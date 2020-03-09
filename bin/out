@@ -11,12 +11,19 @@ export GIT_COMMITTER_EMAIL=engineering@boclips.com
 
 payload="$(cat /dev/stdin)"
 uri="$(get source uri <<< "$payload")"
+branch="$(get source branch <<< "$payload")"
 private_key="$(get source private_key <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
-[ "$kustomization_yaml_path" == null ] \
+[ -z "$kustomization_yaml_path" ] \
     && kustomization_yaml_path=k8s/base/kustomization.yaml
 
-clone "$uri" /tmp/repo master "$private_key"
+if [ -z "$private_key" ]
+then
+    echo "Missing private key!"
+    exit 1
+fi
+
+clone "$uri" /tmp/repo "$branch" "$private_key"
 
 cd /tmp/repo
 

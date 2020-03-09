@@ -7,13 +7,19 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 source "$cwd/common"
 
 payload="$(cat /dev/stdin)"
-
 uri="$(get source uri <<< "$payload")"
-private_key="$(get source private_key <<< "$payload")"
 branch="$(get source branch <<< "$payload")"
+private_key="$(get source private_key <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
-[ "$kustomization_yaml_path" == null ] \
+[ -z "$kustomization_yaml_path" ] \
     && kustomization_yaml_path=k8s/base/kustomization.yaml
+
+if [ -z "$private_key" ]
+then
+    echo "Missing private key!"
+    exit 1
+fi
+
 input_tag="$(get version tag <<< "$payload")"
 
 clone "$uri" /tmp/repo "$branch" "$private_key"

@@ -35,7 +35,8 @@ expected_output='{
   ]
 }'
 
-image_id="$(docker build --quiet "$cwd/..")"
+image_id="$(cat "$cwd/../test_image_id")"
+
 docker_output="$(
 # shellcheck disable=SC1004,SC2016
 docker run \
@@ -52,13 +53,10 @@ git init --bare --quiet
 )
 git clone /tmp/remote-repo local-repo
 (
-cd local-repo
-mkdir some-k8s
-cat <<EOF > some-k8s/kustomization.yaml
-before:
-newTag: "123"
-after:
-EOF
+mkdir local-repo/some-k8s
+touch local-repo/some-k8s/kustomization.yaml
+cd local-repo/some-k8s
+kustomize edit set image app=some-image:123
 git add .
 git config --global user.email "engineering@boclips.com"
 git config --global user.name "A previous CI run"
@@ -92,7 +90,6 @@ assert_equal_json \
     "$actual_output"
 
 echo "out pushes bumped version"
-
 if echo "$new_yaml" | grep -q 'newTag: "124"' \
     && echo "$new_yaml" | grep -q 'boclips-version: "124"'
 then
@@ -105,3 +102,11 @@ else
     echo
     exit 1
 fi
+
+echo "out gives useful message when private key is unset"
+output="$(run "$cwd/.." /opt/resource/out '{
+    "source": {
+        "uri": "git@github.com:boclips/kustomize-version-resource-test-repo"
+    }
+}' || true)"
+assert_equal "Missing private key!" "$output"
