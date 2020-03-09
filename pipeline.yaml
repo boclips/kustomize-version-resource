@@ -53,7 +53,7 @@ resources:
   icon: github-circle
   source:
     branch: master
-    uri: https://github.com/boclips/kustomize-version-resource-test-repo.git
+    uri: git@github.com:boclips/kustomize-version-resource-test-repo.git
     private_key: ((kustomize-version-resource-test-repo.repo-key))
 
 - name: version
