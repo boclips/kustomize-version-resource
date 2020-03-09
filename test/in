@@ -45,4 +45,4 @@ EOF
 echo "in echoes version"
 assert_equal_json \
     "$expected_output" \
-    "$(run "$cwd/.." /opt/resource/in "$input")"
+    "$(run /opt/resource/in "$input")"

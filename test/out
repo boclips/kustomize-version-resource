@@ -104,7 +104,7 @@ else
 fi
 
 echo "out gives useful message when private key is unset"
-output="$(run "$cwd/.." /opt/resource/out '{
+output="$(run /opt/resource/out '{
     "source": {
         "uri": "git@github.com:boclips/kustomize-version-resource-test-repo"
     }

@@ -9,19 +9,13 @@ source "$cwd/common"
 export GIT_COMMITTER_NAME=Kustomizer
 export GIT_COMMITTER_EMAIL=engineering@boclips.com
 
-payload="$(cat /dev/stdin)"
-uri="$(get source uri <<< "$payload")"
-branch="$(get source branch <<< "$payload")"
-private_key="$(get source private_key <<< "$payload")"
-kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
-[ -z "$kustomization_yaml_path" ] \
-    && kustomization_yaml_path=k8s/base/kustomization.yaml
+declare -A config
+parse_payload config "$(cat /dev/stdin)"
 
-if [ -z "$private_key" ]
-then
-    echo "Missing private key!"
-    exit 1
-fi
+uri="${config['uri']}"
+branch="${config['branch']}"
+private_key="${config['private_key']}"
+kustomization_yaml_path="${config['kustomization_yaml_path']}"
 
 clone "$uri" /tmp/repo "$branch" "$private_key"
 

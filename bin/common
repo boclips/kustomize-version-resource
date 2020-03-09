@@ -4,6 +4,25 @@ get () {
     jq --raw-output ".$1.$2 // empty"
 }
 
+parse_payload () {
+    declare -n _config="$1"
+    payload="$2"
+
+    _config['tag']="$(get version tag <<< "$payload")"
+    _config['uri']="$(get source uri <<< "$payload")"
+    _config['branch']="$(get source branch <<< "$payload")"
+    _config['private_key']="$(get source private_key <<< "$payload")"
+    _config['kustomization_yaml_path']="$(get source kustomization_yaml_path <<< "$payload")"
+    [ -z "${_config['kustomization_yaml_path']}" ] \
+        && _config['kustomization_yaml_path']=k8s/base/kustomization.yaml
+
+    if [ -z "${_config['private_key']}" ]
+    then
+        echo "Missing private key!"
+        exit 1
+    fi
+}
+
 clone () {
     uri="$1"
     destination="$2"
