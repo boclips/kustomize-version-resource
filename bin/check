@@ -16,8 +16,7 @@ kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
     && kustomization_yaml_path=k8s/base/kustomization.yaml
 input_tag="$(get version tag <<< "$payload")"
 
-clone "$uri" /tmp/repo "$private_key"
-git -C /tmp/repo checkout "$branch"
+clone "$uri" /tmp/repo "$branch" "$private_key"
 
 current_tag="$("$cwd/parse-version" "/tmp/repo/$kustomization_yaml_path")"
 next_tag=$(( current_tag + 1 ))

@@ -7,9 +7,10 @@ get () {
 clone () {
     uri="$1"
     destination="$2"
-    private_key="$3"
+    branch="$3"
+    private_key="$4"
 
-    mkdir ~/.ssh || true
+    mkdir --parents ~/.ssh
     ssh-keyscan github.com \
         > ~/.ssh/known_hosts \
         2> /dev/null
@@ -19,5 +20,6 @@ clone () {
 
     [ -d "$destination" ] \
         || git clone "$uri" "$destination"
-    git -C "$destination" pull --quiet
+    git -C "$destination" fetch
+    git -C "$destination" checkout "$branch"
 }

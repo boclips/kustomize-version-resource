@@ -88,6 +88,9 @@ assert_equal_json \
     "$expected_backoffice_output" \
     "$(run "$cwd/.." /opt/resource/check "$backoffice_input")"
 
+echo "Can check twice, reusing the container"
+assert_runs_twice "$cwd/.." /opt/resource/check "$backoffice_input"
+
 echo "check repo with explicit kustomization.yaml path"
 assert_equal_json \
     "$expected_frontend_output" \
