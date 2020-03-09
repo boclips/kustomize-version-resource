@@ -31,6 +31,14 @@ jobs:
       image: image/image.tar
       additional_tags: version/version
 
+- name: bump-version
+  plan:
+  - put: test-repo-kustomize-version
+
+- name: get-version
+  plan:
+  - get: test-repo-kustomize-version
+
 resources:
 
 - name: source
@@ -39,6 +47,14 @@ resources:
   source:
     branch: master
     uri: https://github.com/boclips/kustomize-version-resource.git
+
+- name: test-repo-kustomize-version
+  type: kustomize-version
+  icon: github-circle
+  source:
+    branch: master
+    uri: https://github.com/boclips/kustomize-version-resource-test-repo.git
+    private_key: ((kustomize-version-resource-test-repo.repo-key))
 
 - name: version
   type: semver
@@ -57,3 +73,12 @@ resources:
     repository: boclipsconcourse/kustomize-version-resource
     username: boclipsconcourse
     password: ((docker-hub.password))
+
+resource_types:
+
+- name: kustomize-version
+  type: kustomize-version-resource
+  source:
+    uri: git@github.com:boclips/kustomize-version-resource-test-repo.git
+    branch: master
+    private_key: ((kustomize-version-resource-test-repo.repo-key))
