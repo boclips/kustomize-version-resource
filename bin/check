@@ -10,14 +10,15 @@ payload="$(cat /dev/stdin)"
 
 uri="$(get source uri <<< "$payload")"
 private_key="$(get source private_key <<< "$payload")"
+branch="$(get source branch <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 [ "$kustomization_yaml_path" == null ] \
     && kustomization_yaml_path=k8s/base/kustomization.yaml
 input_tag="$(get version tag <<< "$payload")"
 
 clone "$uri" /tmp/repo "$private_key"
-cd /tmp/repo
-git pull --quiet
+git -C /tmp/repo pull --quiet
+git -C /tmp/repo checkout "$branch"
 
 current_tag="$(
 grep newTag "/tmp/repo/$kustomization_yaml_path" \

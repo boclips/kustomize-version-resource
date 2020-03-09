@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 get () {
     jq --raw-output ".$1.$2"
 }
@@ -15,6 +17,7 @@ clone () {
 
     chmod 0400 ~/.ssh/id_rsa
 
-    [ -d /tmp/repo ] \
+    [ -d "$destination" ] \
         || git clone "$uri" "$destination"
+    git -C "$destination" pull --quiet
 }
