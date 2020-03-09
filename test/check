@@ -14,6 +14,21 @@ frontend_uri="git@github.com:boclips/frontend.git"
 frontend_private_key="$(bo show credential concourse-main boclips.frontend repo-key)"
 frontend_commit_with_9_version=08d9a42b628a3c09ea8e42f915d69c97946170d7
 
+backoffice_input_initial="$(
+jq \
+    --null-input \
+    --arg uri "$backoffice_uri" \
+    --arg branch "$backoffice_commit_with_150_version" \
+    --arg private_key "$backoffice_private_key" \
+    '{
+       source: {
+         uri: $uri,
+         branch: $branch,
+         private_key: $private_key
+       }
+     }'
+)"
+
 backoffice_input="$(
 jq \
     --null-input \
@@ -82,6 +97,11 @@ expected_frontend_output="$(cat <<EOF
 ]
 EOF
 )"
+
+echo "check returns current version on first request"
+assert_equal_json \
+    '[ { "version": "150" } ]' \
+    "$(run /opt/resource/check "$backoffice_input_initial")"
 
 echo "check repo without explicit kustomization.yaml path"
 assert_equal_json \

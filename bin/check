@@ -17,8 +17,15 @@ input_tag="${config['tag']}"
 clone "$uri" /tmp/repo "$branch" "$private_key"
 
 current_tag="$("$cwd/parse-version" "/tmp/repo/$kustomization_yaml_path")"
-next_tag=$(( current_tag + 1 ))
+to=$(( current_tag + 1 ))
+
+if [ -z "$input_tag" ]
+then
+    from="$current_tag"
+else
+    from="$input_tag"
+fi
 
 jq \
     --null-input \
-    "[range($input_tag;$next_tag) | { version: . | tostring }]"
+    "[range($from;$to) | { version: . | tostring }]"
