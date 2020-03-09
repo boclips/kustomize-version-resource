@@ -77,8 +77,7 @@ resources:
 resource_types:
 
 - name: kustomize-version
-  type: kustomize-version-resource
+  type: registry-image
   source:
-    uri: git@github.com:boclips/kustomize-version-resource-test-repo.git
-    branch: master
-    private_key: ((kustomize-version-resource-test-repo.repo-key))
+    repository: boclipsconcourse/kustomize-version-resource
+    tag: 0.2.0
