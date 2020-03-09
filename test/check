@@ -68,39 +68,39 @@ jq \
 
 expected_backoffice_output="$(cat <<EOF
 [
-  { "version": "140" },
-  { "version": "141" },
-  { "version": "142" },
-  { "version": "143" },
-  { "version": "144" },
-  { "version": "145" },
-  { "version": "146" },
-  { "version": "147" },
-  { "version": "148" },
-  { "version": "149" },
-  { "version": "150" }
+  { "tag": "140" },
+  { "tag": "141" },
+  { "tag": "142" },
+  { "tag": "143" },
+  { "tag": "144" },
+  { "tag": "145" },
+  { "tag": "146" },
+  { "tag": "147" },
+  { "tag": "148" },
+  { "tag": "149" },
+  { "tag": "150" }
 ]
 EOF
 )"
 
 expected_frontend_output="$(cat <<EOF
 [
-  { "version": "1" },
-  { "version": "2" },
-  { "version": "3" },
-  { "version": "4" },
-  { "version": "5" },
-  { "version": "6" },
-  { "version": "7" },
-  { "version": "8" },
-  { "version": "9" }
+  { "tag": "1" },
+  { "tag": "2" },
+  { "tag": "3" },
+  { "tag": "4" },
+  { "tag": "5" },
+  { "tag": "6" },
+  { "tag": "7" },
+  { "tag": "8" },
+  { "tag": "9" }
 ]
 EOF
 )"
 
 echo "check returns current version on first request"
 assert_equal_json \
-    '[ { "version": "150" } ]' \
+    '[ { "tag": "150" } ]' \
     "$(run /opt/resource/check "$backoffice_input_initial")"
 
 echo "check repo without explicit kustomization.yaml path"

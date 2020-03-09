@@ -47,4 +47,4 @@ git push --quiet
 jq \
     --null-input \
     --arg tag "$bumped_version" \
-    '{ version: $tag, metadata: [{ name: "tag", value: $tag }] }'
+    '{ version: { tag: $tag }, metadata: [{ name: "tag", value: $tag }] }'

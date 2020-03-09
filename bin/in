@@ -13,4 +13,4 @@ input_tag="$(get version tag <<< "$payload")"
 jq \
     --null-input \
     --arg tag "$input_tag" \
-    '{ version: $tag, metadata: [{ name: "tag", value: $tag }] }'
+    '{ version: { tag: $tag }, metadata: [{ name: "tag", value: $tag }] }'

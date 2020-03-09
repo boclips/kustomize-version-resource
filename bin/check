@@ -28,4 +28,4 @@ fi
 
 jq \
     --null-input \
-    "[range($from;$to) | { version: . | tostring }]"
+    "[range($from;$to) | { tag: . | tostring }]"

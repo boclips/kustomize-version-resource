@@ -31,7 +31,9 @@ jq \
 
 expected_output="$(cat <<EOF
 {
-  "version": "149",
+  "version": {
+    "tag": "149"
+  },
   "metadata": [
     {
       "name": "tag",
