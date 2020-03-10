@@ -6,96 +6,32 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-uri="/tmp/remote-repo"
-
-input="$(
-jq \
-    --null-input \
-    --arg uri "$uri" \
-    --arg branch master \
-    --arg private_key "unused-in-this-test" \
-    '{
-       source: {
-         uri: $uri,
-         branch: $branch,
-         private_key: $private_key,
-         kustomization_yaml_path: "some-k8s/kustomization.yaml"
-       },
-       params: {}
-     }'
-)"
-
-expected_output='{
-  "version": {
-    "tag": "124"
-  },
-  "metadata": [
-    {
-      "name": "tag",
-      "value": "124"
-    }
-  ]
-}'
-
-image_id="$(cat "$cwd/../test_image_id")"
-
-docker_output="$(
-# shellcheck disable=SC1004,SC2016
-docker run \
-    --interactive \
-    --entrypoint=bash \
-    "$image_id" \
-    -c \
-    '
-input="$(cat /dev/stdin)"
-mkdir /tmp/remote-repo
-(
-cd "/tmp/remote-repo"
-git init --bare --quiet
-)
-git clone /tmp/remote-repo local-repo
-(
-mkdir local-repo/some-k8s
-touch local-repo/some-k8s/kustomization.yaml
-cd local-repo/some-k8s
-kustomize edit set image app=some-image:123
-git add .
-git config --global user.email "engineering@boclips.com"
-git config --global user.name "A previous CI run"
-git commit --quiet --message=LOL
-git push
-)
-
-output="$(/opt/resource/out <<< "$input")"
-
-git -C local-repo pull --quiet
-
-jq --null-input \
-    --raw-output \
-    --arg newyaml "$(cat local-repo/some-k8s/kustomization.yaml)" \
-    --arg output "$output" \
-    '\''
-{
-  newyaml: $newyaml,
-  output: $output
-}
-'\''
-' <<< "$input"
-)"
-
-new_yaml="$(jq --raw-output .newyaml <<< "$docker_output")"
-actual_output="$(jq --raw-output .output <<< "$docker_output")"
+container_id="$(create /opt/resource/out)"
+dir=$(mktemp -d -t test-out.XXXXX)
 
 echo "out bumps emitted version"
+init_repo "$container_id" "$dir"
+bump_version 123 "$dir"
+copy_kustomize_repo "$container_id" remote-repo-v123 "$dir"
+
 assert_equal_json \
-    "$expected_output" \
-    "$actual_output"
+    '{"version":{"tag":"124"},
+      "metadata":[{"name":"tag","value":"124"}]}' \
+    "$(start_container \
+        "$container_id" \
+        '{"source":{"uri":"/tmp/remote-repo-v123","branch":"master","private_key":"unused"},
+          "params":{}}')"
 
 echo "out pushes bumped version"
+docker cp -a "$container_id:/tmp/remote-repo-v123" "$dir/changed-repo"
+git clone --quiet "$dir/changed-repo" "$dir/pulled-changes"
+new_yaml="$(cat "$dir/pulled-changes/k8s/base/kustomization.yaml")"
+
 if echo "$new_yaml" | grep -q 'newTag: "124"' \
     && echo "$new_yaml" | grep -q 'boclips-version: "124"'
 then
     echo "Test passed"
+    echo
 else
     echo "Test failed"
     echo

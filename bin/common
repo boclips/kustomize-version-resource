@@ -37,8 +37,7 @@ clone () {
 
     chmod 0400 ~/.ssh/id_rsa
 
-    [ -d "$destination" ] \
-        || git clone "$uri" "$destination"
-    git -C "$destination" fetch --quiet
+    rm -rf "$destination"
+    git clone --quiet "$uri" "$destination"
     git -C "$destination" checkout --quiet "$branch"
 }

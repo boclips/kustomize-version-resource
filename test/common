@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 cwd="$(cd "$(dirname "$0")" && pwd)"
 
 create () {
@@ -12,11 +14,15 @@ create () {
 
 start_container () {
     container_id="$1"
-    input="$2"
+    input="$(json "$2")"
     docker start \
         --interactive \
         "$container_id" \
         <<< "$input"
+}
+
+json () {
+    jq <<< "$1"
 }
 
 run () {
@@ -26,34 +32,17 @@ run () {
     start_container "$container_id" "$input"
 }
 
-assert_runs_twice () {
-    entrypoint="$1"
-    input="$2"
-    container_id="$(create "$entrypoint")"
-
-    echo "Run 1"
-    echo
-    start_container "$container_id" "$input" > /dev/null
-    echo
-    echo "Run 2"
-    echo
-    if start_container "$container_id" "$input" > /dev/null
-    then
-        echo "Test passed"
-    else
-        echo "Test failed"
-        exit 1
-    fi
-}
-
 assert_equal_json () {
-    assert_equal "$(jq <<< "$1")" "$(jq <<< "$2")"
+    lhs="$(json "$1")"
+    rhs="$(json "$2")"
+    assert_equal "$lhs" "$rhs"
 }
 
 assert_equal () {
     if [ "$1" == "$2" ]
     then
         echo "Test passed"
+        echo
     else
         echo "Test failed"
         echo
@@ -65,4 +54,41 @@ assert_equal () {
         echo
         exit 1
     fi
+}
+
+init_repo () {
+    container_id=$1
+    dir=$2
+    (
+        cd "$dir"
+        mkdir remote-repo
+        git -C remote-repo init --bare --quiet
+        git clone --quiet remote-repo local-repo 2> /dev/null
+        mkdir -p local-repo/k8s/base
+
+        cd local-repo/k8s/base
+        touch kustomization.yaml
+    )
+}
+
+bump_version () {
+    version=$1
+    dir=$2
+    (
+        cd "$dir/local-repo/k8s/base"
+        kustomize edit set image "app=my-image:$version"
+        git add .
+        git config --global user.email engineering@boclips.com
+        git config --global user.name Concourse
+        git commit --quiet --message="bump to v$version"
+        git push --quiet
+    )
+}
+
+copy_kustomize_repo () {
+    container_id=$1
+    destination=$2
+    dir=$3
+
+    docker cp -a "$dir/remote-repo" "$container_id:/tmp/$destination"
 }
