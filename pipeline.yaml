@@ -31,7 +31,7 @@ jobs:
       image: image/image.tar
       additional_tags: version/version
 
-- name: bump-version
+- name: bump-version-playground
   plan:
   - put: version
     resource: test-repo-kustomize-version
@@ -53,7 +53,7 @@ jobs:
           cat version/tag
           cat version/app
 
-- name: get-version
+- name: get-version-playground
   plan:
   - get: test-repo-kustomize-version
 
