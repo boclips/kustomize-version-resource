@@ -5,4 +5,4 @@ test: test_image_id
 	test/check
 
 test_image_id: bin/in bin/out bin/check bin/common
-	docker build --quiet . > $@
+	docker build --quiet --iidfile $@ .
