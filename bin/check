@@ -17,6 +17,7 @@ input_tag="${config['tag']}"
 clone "$uri" /tmp/repo "$branch" "$private_key"
 
 current_tag="$("$cwd/parse-version" "/tmp/repo/$kustomization_yaml_path")"
+app="$("$cwd/parse-app" "/tmp/repo/$kustomization_yaml_path")"
 to=$(( current_tag + 1 ))
 
 if [ -z "$input_tag" ]
@@ -28,4 +29,7 @@ fi
 
 jq \
     --null-input \
-    "[range($from;$to) | { tag: . | tostring }]"
+    --arg app "$app" \
+    --argjson from "$from" \
+    --argjson to "$to" \
+    '[range($from;$to) | { tag: . | tostring, app: $app }]'

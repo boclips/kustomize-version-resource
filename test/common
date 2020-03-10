@@ -4,6 +4,10 @@ set -e
 
 cwd="$(cd "$(dirname "$0")" && pwd)"
 
+it () {
+    echo "$@"
+}
+
 create () {
     image_id="$(cat "$cwd/../test_image_id")"
     docker create \
@@ -22,7 +26,7 @@ start_container () {
 }
 
 json () {
-    jq <<< "$1"
+    jq --null-input "$@"
 }
 
 run () {
@@ -72,15 +76,15 @@ init_repo () {
 }
 
 bump_version () {
-    version=$1
+    image=$1
     dir=$2
     (
         cd "$dir/local-repo/k8s/base"
-        kustomize edit set image "app=my-image:$version"
+        kustomize edit set image "$image"
         git add .
         git config --global user.email engineering@boclips.com
         git config --global user.name Concourse
-        git commit --quiet --message="bump to v$version"
+        git commit --quiet --message=bump
         git push --quiet
     )
 }
