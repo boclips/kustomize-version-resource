@@ -20,7 +20,8 @@ assert_equal_json '
     { name: "app", value: "backoffice" }
   ]
 }' \
-    "$(run /opt/resource/in "$(
+    "$(run /opt/resource/in \
+    "$(
 jq \
     --null-input \
     --arg uri "$uri" \
@@ -38,4 +39,45 @@ jq \
        },
        params: {}
      }'
-)")"
+)" \
+    /tmp)"
+
+it "writes tag to the given dir"
+
+given_dir=/tmp
+container_id="$(create /opt/resource/in $given_dir)"
+dir=$(mktemp -d -t test-in.XXXXX)
+init_repo "$container_id" "$dir"
+bump_version "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
+copy_kustomize_repo "$container_id" remote-repo-v123 "$dir"
+
+input="$(json '
+{
+    source: {
+        uri: "/tmp/remote-repo-v123",
+        branch: "master",
+        private_key: "unused"
+    },
+    version: {
+        tag: "123",
+        app: "my-app"
+    },
+    params: {}
+}
+')"
+start_container "$container_id" "$input" > /dev/null
+docker cp -a "$container_id:$given_dir/tag" "$dir/output-tag"
+
+assert_equal \
+    "123" \
+    "$(cat "$dir/output-tag")"
+
+it "writes app name to given dir"
+docker cp -a "$container_id:$given_dir/app" "$dir/output-app"
+
+assert_equal \
+    "my-app" \
+    "$(cat "$dir/output-app")"
+
+docker rm "$container_id" > /dev/null
+rm -rf "$dir"

@@ -60,3 +60,5 @@ run \
     || true
 )"
 assert_equal "Missing private key!" "$output"
+
+rm -rf "$dir"
