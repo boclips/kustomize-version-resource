@@ -14,9 +14,10 @@ it "echoes version"
 
 assert_equal_json '
 {
-  version: { tag: "149" },
+  version: { tag: "149", app: "backoffice" },
   metadata: [
-    { name: "tag", value: "149" }
+    { name: "tag", value: "149" },
+    { name: "app", value: "backoffice" }
   ]
 }' \
     "$(run /opt/resource/in "$(
@@ -32,7 +33,8 @@ jq \
          private_key: $private_key
        },
        version: {
-         tag: "149"
+         tag: "149",
+         app: "backoffice"
        },
        params: {}
      }'

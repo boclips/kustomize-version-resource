@@ -9,8 +9,14 @@ source "$cwd/common"
 payload="$(cat /dev/stdin)"
 
 input_tag="$(get version tag <<< "$payload")"
+app="$(get version app <<< "$payload")"
 
 jq \
     --null-input \
     --arg tag "$input_tag" \
-    '{ version: { tag: $tag }, metadata: [{ name: "tag", value: $tag }] }'
+    --arg app "$app" \
+    '{ version: { tag: $tag, app: $app },
+       metadata: [
+         { name: "tag", value: $tag },
+         { name: "app", value: $app }
+       ] }'
