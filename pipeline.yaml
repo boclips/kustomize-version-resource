@@ -56,6 +56,7 @@ jobs:
 - name: get-version-playground
   plan:
   - get: test-repo-kustomize-version
+    trigger: true
 
 resources:
 
