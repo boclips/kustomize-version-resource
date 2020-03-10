@@ -1,3 +1,4 @@
+set -e
 git pull --rebase
 make
 git push
