@@ -35,12 +35,7 @@ git \
   --quiet \
   --all \
   --author="$GIT_COMMITTER_NAME <$GIT_COMMITTER_EMAIL>" \
-  --message="$(cat <<EOF
-Bump version to $bumped_version
-
-[ci skip]
-EOF
-)"
+  --message="Bump version to $bumped_version"
 
 git push --quiet
 
