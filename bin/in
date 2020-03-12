@@ -11,8 +11,14 @@ payload="$(cat)"
 
 input_tag="$(get version tag <<< "$payload")"
 app="$(get version app <<< "$payload")"
+bump="$(get params bump <<< "$payload")"
 
-output_tag=$(( input_tag + 1 ))
+if [ "$bump" == "true" ]
+then
+    output_tag=$(( input_tag + 1 ))
+else
+    output_tag="$input_tag"
+fi
 
 echo "$output_tag" \
     > "$destination/tag"

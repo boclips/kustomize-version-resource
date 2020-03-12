@@ -41,7 +41,7 @@ source "$cwd/common"
     docker rm "$container_id" > /dev/null
 )
 
-it "successfully checks repo with explicit kustomization.yaml path"
+it "successfully checks GitHub repo with explicit kustomization.yaml path"
 frontend_uri="git@github.com:boclips/frontend.git"
 frontend_private_key="$(bo show credential concourse-main boclips.frontend repo-key)"
 frontend_commit_with_9_version=08d9a42b628a3c09ea8e42f915d69c97946170d7
