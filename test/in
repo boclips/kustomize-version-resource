@@ -16,6 +16,7 @@ assert_equal_json '
 {
   version: { tag: "150", app: "backoffice" },
   metadata: [
+    { name: "previous-tag", value: "149" },
     { name: "tag", value: "150" },
     { name: "app", value: "backoffice" }
   ]

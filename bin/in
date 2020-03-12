@@ -21,10 +21,12 @@ echo "$app" \
 
 jq \
     --null-input \
+    --arg previous_tag "$input_tag" \
     --arg tag "$output_tag" \
     --arg app "$app" \
     '{ version: { tag: $tag, app: $app },
        metadata: [
+         { name: "previous-tag", value: $previous_tag },
          { name: "tag", value: $tag },
          { name: "app", value: $app }
        ] }'
