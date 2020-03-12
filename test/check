@@ -11,9 +11,9 @@ source "$cwd/common"
     dir=$(mktemp -d -t test-check.XXXXX)
 
     it "produces a version on first run"
-    init_repo "$container_id" "$dir"
-    bump_version "app=eu.gcr.io/boclips-prod/boclips/my-app:1" "$dir"
-    copy_kustomize_repo "$container_id" remote-repo-v1 "$dir"
+    init_kustomize_repo "$dir"
+    commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:1" "$dir"
+    copy_kustomize_repo "$dir" "$container_id" remote-repo-v1
 
     assert_equal_json \
         '[ { tag:"1", app: "my-app" } ]' \
@@ -22,10 +22,10 @@ source "$cwd/common"
         }')"
 
     it "produces multiple versions, given a prior version, on future runs"
-    bump_version "app=eu.gcr.io/boclips-prod/boclips/my-app:2"  "$dir"
-    bump_version "app=eu.gcr.io/boclips-prod/boclips/my-app:3"  "$dir"
-    bump_version "app=eu.gcr.io/boclips-prod/boclips/changed-app:4"  "$dir"
-    copy_kustomize_repo "$container_id" remote-repo-v2 "$dir"
+    commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:2"  "$dir"
+    commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:3"  "$dir"
+    commit_image "app=eu.gcr.io/boclips-prod/boclips/changed-app:4"  "$dir"
+    copy_kustomize_repo "$dir" "$container_id" remote-repo-v2
 
     assert_equal_json \
         '[ { tag: "2", app: "changed-app"},

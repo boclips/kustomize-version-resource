@@ -12,14 +12,16 @@ payload="$(cat /dev/stdin)"
 input_tag="$(get version tag <<< "$payload")"
 app="$(get version app <<< "$payload")"
 
-echo "$input_tag" \
+output_tag=$(( input_tag + 1 ))
+
+echo "$output_tag" \
     > "$destination/tag"
 echo "$app" \
     > "$destination/app"
 
 jq \
     --null-input \
-    --arg tag "$input_tag" \
+    --arg tag "$output_tag" \
     --arg app "$app" \
     '{ version: { tag: $tag, app: $app },
        metadata: [

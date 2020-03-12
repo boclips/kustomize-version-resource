@@ -10,13 +10,13 @@ uri="git@github.com:boclips/backoffice.git"
 private_key="$(bo show credential concourse-main boclips.backoffice repo-key)"
 commit_with_149_version=870d3fd6bddc4d04f325e25b6eb3849f099e2565
 
-it "echoes version"
+it "bumps incoming version"
 
 assert_equal_json '
 {
-  version: { tag: "149", app: "backoffice" },
+  version: { tag: "150", app: "backoffice" },
   metadata: [
-    { name: "tag", value: "149" },
+    { name: "tag", value: "150" },
     { name: "app", value: "backoffice" }
   ]
 }' \
@@ -42,14 +42,14 @@ jq \
 )" \
     /tmp)"
 
-it "writes tag to the given dir"
+it "writes bumped tag to the given dir"
 
-given_dir=/tmp
-container_id="$(create /opt/resource/in $given_dir)"
+concourse_writeable_dir=/tmp
+container_id="$(create /opt/resource/in $concourse_writeable_dir)"
 dir=$(mktemp -d -t test-in.XXXXX)
-init_repo "$container_id" "$dir"
-bump_version "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
-copy_kustomize_repo "$container_id" remote-repo-v123 "$dir"
+init_kustomize_repo "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
+copy_kustomize_repo "$dir" "$container_id" remote-repo-v123
 
 input="$(json '
 {
@@ -66,14 +66,14 @@ input="$(json '
 }
 ')"
 start_container "$container_id" "$input" > /dev/null
-docker cp -a "$container_id:$given_dir/tag" "$dir/output-tag"
+docker cp -a "$container_id:$concourse_writeable_dir/tag" "$dir/output-tag"
 
 assert_equal \
-    "123" \
+    "124" \
     "$(cat "$dir/output-tag")"
 
 it "writes app name to given dir"
-docker cp -a "$container_id:$given_dir/app" "$dir/output-app"
+docker cp -a "$container_id:$concourse_writeable_dir/app" "$dir/output-app"
 
 assert_equal \
     "my-app" \

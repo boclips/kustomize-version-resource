@@ -61,14 +61,15 @@ assert_equal () {
     fi
 }
 
-init_repo () {
-    container_id=$1
-    dir=$2
+init_kustomize_repo () {
+    dir=$1
     (
         cd "$dir"
         mkdir remote-repo
         git -C remote-repo init --bare --quiet
         git clone --quiet remote-repo local-repo 2> /dev/null
+        git -C local-repo config user.email engineering@boclips.com
+        git -C local-repo config user.name Concourse
         mkdir -p local-repo/k8s/base
 
         cd local-repo/k8s/base
@@ -76,24 +77,22 @@ init_repo () {
     )
 }
 
-bump_version () {
+commit_image () {
     image=$1
     dir=$2
     (
         cd "$dir/local-repo/k8s/base"
         kustomize edit set image "$image"
         git add .
-        git config --global user.email engineering@boclips.com
-        git config --global user.name Concourse
         git commit --quiet --message=bump
         git push --quiet
     )
 }
 
 copy_kustomize_repo () {
-    container_id=$1
-    destination=$2
-    dir=$3
+    dir=$1
+    container_id=$2
+    destination=$3
 
     docker cp -a "$dir/remote-repo" "$container_id:/tmp/$destination"
 }

@@ -9,11 +9,13 @@ source "$cwd/common"
 container_id="$(create /opt/resource/out)"
 dir=$(mktemp -d -t test-out.XXXXX)
 
-it "bumps emitted version"
+it "emits the pushed version"
 
-init_repo "$container_id" "$dir"
-bump_version "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
-copy_kustomize_repo "$container_id" remote-repo-v123 "$dir"
+init_kustomize_repo "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
+copy_kustomize_repo "$dir" "$container_id" remote-repo-v123
+echo 124 > "$dir/version-file"
+docker cp "$dir/version-file" "$container_id:/tmp/version-file"
 
 assert_equal_json \
     '{
@@ -28,13 +30,13 @@ assert_equal_json \
        source: { uri: "/tmp/remote-repo-v123",
                  branch: "master",
                  private_key: "unused" },
-       params: {}
+       params: { file: "/tmp/version-file" }
      }')"
 
-it "pushes bumped version"
+it "pushes the referenced version"
 
-docker cp -a "$container_id:/tmp/remote-repo-v123" "$dir/changed-repo"
-git clone --quiet "$dir/changed-repo" "$dir/pulled-changes"
+docker cp -a "$container_id:/tmp/remote-repo-v123" "$dir/changed-bare-repo"
+git clone --quiet "$dir/changed-bare-repo" "$dir/pulled-changes"
 new_yaml="$(cat "$dir/pulled-changes/k8s/base/kustomization.yaml")"
 
 if echo "$new_yaml" | grep -q 'newTag: "124"' \
@@ -54,7 +56,7 @@ fi
 it "includes a useful commit message"
 
 assert_equal \
-    "Bump version to 124" \
+    "Bump my-app version to 124" \
     "$(git -C "$dir/pulled-changes" log -n1 --pretty=format:%B)"
 
 it "gives useful message when private key is unset"
