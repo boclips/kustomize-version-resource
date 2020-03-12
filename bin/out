@@ -12,15 +12,12 @@ export GIT_COMMITTER_EMAIL=engineering@boclips.com
 declare -A config
 parse_payload config "$(cat)"
 
-log "in $PWD"
-log "directory listing:"
-log "$(find .)"
-
+resources_root=$1
 uri="${config['uri']}"
 branch="${config['branch']}"
 private_key="${config['private_key']}"
 kustomization_yaml_path="${config['kustomization_yaml_path']}"
-version="$(cat "${config['file']}")"
+version="$(cat "$resources_root/${config['file']}")"
 clone_dir=/tmp/repo
 
 clone "$uri" "$clone_dir" "$branch" "$private_key"

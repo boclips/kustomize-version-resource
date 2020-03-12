@@ -6,7 +6,8 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-container_id="$(create /opt/resource/out)"
+concourse_writeable_dir=/root
+container_id="$(create /opt/resource/out "$concourse_writeable_dir")"
 dir=$(mktemp -d -t test-out.XXXXX)
 
 it "emits the pushed version"
@@ -14,8 +15,9 @@ it "emits the pushed version"
 init_kustomize_repo "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
 copy_kustomize_repo "$dir" "$container_id" remote-repo-v123
+
 echo 124 > "$dir/version-file"
-docker cp "$dir/version-file" "$container_id:/tmp/version-file"
+docker cp "$dir/version-file" "$container_id:$concourse_writeable_dir"
 
 assert_equal_json \
     '{

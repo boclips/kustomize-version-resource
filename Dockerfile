@@ -8,4 +8,3 @@ ADD https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv
 RUN tar -C /usr/local/bin -xf kustomize.tar.gz
 RUN mkdir /opt/resource
 ADD bin/* /opt/resource/
-WORKDIR /tmp
