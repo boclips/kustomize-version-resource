@@ -9,6 +9,8 @@ source "$cwd/common"
 destination=$1
 payload="$(cat)"
 
+validate_payload "$payload"
+
 input_tag="$(get version tag <<< "$payload")"
 app="$(get version app <<< "$payload")"
 bump="$(get params bump <<< "$payload")"

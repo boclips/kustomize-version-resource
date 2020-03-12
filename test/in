@@ -20,7 +20,8 @@ non_bump_input="$(json '
     source: {
         uri: "/tmp/remote-repo-v123",
         branch: "master",
-        private_key: "unused"
+        private_key: "unused",
+        kustomization_yaml_path: "k8s/base/kustomization.yaml"
     },
     version: {
         tag: "123",
@@ -49,7 +50,8 @@ bump_input="$(json '
     source: {
         uri: "/tmp/remote-repo-v123",
         branch: "master",
-        private_key: "unused"
+        private_key: "unused",
+        kustomization_yaml_path: "k8s/base/kustomization.yaml"
     },
     version: {
         tag: "123",
@@ -62,8 +64,7 @@ bump_output="$(start_container "$container_id" "$bump_input")"
 
 it "emits a bumped version"
 
-assert_equal_json \
-    '{
+assert_equal_json '{
   version: { tag: "124", app: "my-app" },
   metadata: [
     { name: "previous-tag", value: "123" },

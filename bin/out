@@ -9,15 +9,18 @@ source "$cwd/common"
 export GIT_COMMITTER_NAME=Kustomizer
 export GIT_COMMITTER_EMAIL=engineering@boclips.com
 
-declare -A config
-parse_payload config "$(cat)"
+payload="$(cat)"
+
+validate_payload "$payload"
 
 resources_root=$1
-uri="${config['uri']}"
-branch="${config['branch']}"
-private_key="${config['private_key']}"
-kustomization_yaml_path="${config['kustomization_yaml_path']}"
-version="$(cat "$resources_root/${config['file']}")"
+
+uri="$(get source uri <<< "$payload")"
+branch="$(get source branch <<< "$payload")"
+private_key="$(get source private_key <<< "$payload")"
+kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
+version_file="$(get params file <<< "$payload")"
+version="$(cat "$resources_root/$version_file")"
 clone_dir=/tmp/repo
 
 clone "$uri" "$clone_dir" "$branch" "$private_key"

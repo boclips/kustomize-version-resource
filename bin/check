@@ -6,13 +6,14 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-declare -A config
-parse_payload config "$(cat)"
-uri="${config['uri']}"
-branch="${config['branch']}"
-private_key="${config['private_key']}"
-kustomization_yaml_path="${config['kustomization_yaml_path']}"
-input_tag="${config['tag']}"
+payload="$(cat)"
+validate_payload "$payload"
+
+uri="$(get source uri <<< "$payload")"
+branch="$(get source branch <<< "$payload")"
+private_key="$(get source private_key <<< "$payload")"
+kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
+input_tag="$(get version tag <<< "$payload")"
 
 clone "$uri" /tmp/repo "$branch" "$private_key"
 

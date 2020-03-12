@@ -18,7 +18,12 @@ source "$cwd/common"
     assert_equal_json \
         '[ { tag:"1", app: "my-app" } ]' \
         "$(start_container "$container_id" '{
-            source: { uri: "/tmp/remote-repo-v1", branch: "master", private_key: "something" }
+            source: {
+                uri: "/tmp/remote-repo-v1",
+                branch: "master",
+                private_key: "something",
+                kustomization_yaml_path: "k8s/base/kustomization.yaml"
+            }
         }')"
 
     it "produces multiple versions, given a prior version, on future runs"
@@ -33,7 +38,12 @@ source "$cwd/common"
            { tag: "4", app: "changed-app"}
          ]' \
         "$(start_container "$container_id" '{
-            source: { uri: "/tmp/remote-repo-v2", branch: "master", private_key: "something" },
+            source: {
+                uri: "/tmp/remote-repo-v2",
+                branch: "master",
+                private_key: "something",
+                kustomization_yaml_path: "k8s/base/kustomization.yaml"
+            },
             version: { tag: "2", app: "my-app" }
         }')"
 
@@ -41,23 +51,22 @@ source "$cwd/common"
     docker rm "$container_id" > /dev/null
 )
 
-it "successfully checks GitHub repo with explicit kustomization.yaml path"
-frontend_uri="git@github.com:boclips/frontend.git"
-frontend_private_key="$(bo show credential concourse-main boclips.frontend repo-key)"
-frontend_commit_with_9_version=08d9a42b628a3c09ea8e42f915d69c97946170d7
+it "successfully checks GitHub repo"
+uri="git@github.com:boclips/release-manifests.git"
+private_key="$(bo show credential concourse-main boclips.release-manifests repo-key)"
 
-frontend_input="$(
+input="$(
 jq \
     --null-input \
-    --arg uri "$frontend_uri" \
-    --arg branch "$frontend_commit_with_9_version" \
-    --arg private_key "$frontend_private_key" \
+    --arg uri "$uri" \
+    --arg branch master \
+    --arg private_key "$private_key" \
     '{
        source: {
          uri: $uri,
          branch: $branch,
          private_key: $private_key,
-         kustomization_yaml_path: "k8s/boclips/base/kustomization.yaml"
+         kustomization_yaml_path: "k8s/gateway/base/kustomization.yaml"
        },
        version: {
          tag: "1"
@@ -67,15 +76,16 @@ jq \
 
 assert_equal_json '
 [
-  { tag: "1", app: "boclips-frontend" },
-  { tag: "2", app: "boclips-frontend" },
-  { tag: "3", app: "boclips-frontend" },
-  { tag: "4", app: "boclips-frontend" },
-  { tag: "5", app: "boclips-frontend" },
-  { tag: "6", app: "boclips-frontend" },
-  { tag: "7", app: "boclips-frontend" },
-  { tag: "8", app: "boclips-frontend" },
-  { tag: "9", app: "boclips-frontend" }
+  { tag: "1", app: "gateway" },
+  { tag: "2", app: "gateway" },
+  { tag: "3", app: "gateway" },
+  { tag: "4", app: "gateway" },
+  { tag: "5", app: "gateway" },
+  { tag: "6", app: "gateway" },
+  { tag: "7", app: "gateway" },
+  { tag: "8", app: "gateway" },
+  { tag: "9", app: "gateway" },
+  { tag: "10", app: "gateway" }
 ]
 ' \
-    "$(run /opt/resource/check "$frontend_input")"
+    "$(run /opt/resource/check "$input" | jq '.[0:10]')"

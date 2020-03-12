@@ -31,7 +31,9 @@ assert_equal_json \
     '{
        source: { uri: "/tmp/remote-repo-v123",
                  branch: "master",
-                 private_key: "unused" },
+                 private_key: "unused",
+                 kustomization_yaml_path: "k8s/base/kustomization.yaml"
+               },
        params: { file: "version-file" }
      }')"
 
@@ -67,8 +69,11 @@ output="$(
 run \
     /opt/resource/out \
     '{ source: { uri: "git@github.com:boclips/kustomize-version-resource-test-repo" } }' \
+    2>&1 \
     || true
 )"
-assert_equal "Missing private key!" "$output"
+assert_equal \
+    "Must provide uri, private_key and kustomization_yaml_path" \
+    "$output"
 
 rm -rf "$dir"
