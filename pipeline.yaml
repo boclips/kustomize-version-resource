@@ -34,7 +34,9 @@ jobs:
 - name: bump-version-playground
   plan:
   - get: version
-    resource: test-repo-kustomize-version
+    resource: test-version
+    params:
+      bump: true
   - task: cat-result
     config:
       platform: linux
@@ -52,7 +54,7 @@ jobs:
         - |-
           cat version/tag
           cat version/app
-  - put: test-repo-kustomize-version
+  - put: test-version
     params:
       file: version/tag
 
@@ -65,7 +67,7 @@ resources:
     branch: master
     uri: https://github.com/boclips/kustomize-version-resource.git
 
-- name: test-repo-kustomize-version
+- name: test-version
   type: kustomize-version
   icon: github-circle
   source:
@@ -98,4 +100,4 @@ resource_types:
   type: registry-image
   source:
     repository: boclipsconcourse/kustomize-version-resource
-    tag: latest
+    tag: 0.17.0
