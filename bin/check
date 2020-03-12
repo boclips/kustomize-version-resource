@@ -7,7 +7,7 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 source "$cwd/common"
 
 declare -A config
-parse_payload config "$(cat /dev/stdin)"
+parse_payload config "$(cat)"
 uri="${config['uri']}"
 branch="${config['branch']}"
 private_key="${config['private_key']}"

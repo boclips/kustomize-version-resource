@@ -23,7 +23,8 @@ start_container () {
     docker start \
         --interactive \
         "$container_id" \
-        <<< "$input"
+        <<< "$input" \
+        2> /dev/null
 }
 
 json () {

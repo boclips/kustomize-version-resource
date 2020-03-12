@@ -10,7 +10,11 @@ export GIT_COMMITTER_NAME=Kustomizer
 export GIT_COMMITTER_EMAIL=engineering@boclips.com
 
 declare -A config
-parse_payload config "$(cat /dev/stdin)"
+parse_payload config "$(cat)"
+
+log "in $PWD"
+log "directory listing:"
+log "$(find .)"
 
 uri="${config['uri']}"
 branch="${config['branch']}"

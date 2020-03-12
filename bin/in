@@ -7,7 +7,7 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 source "$cwd/common"
 
 destination=$1
-payload="$(cat /dev/stdin)"
+payload="$(cat)"
 
 input_tag="$(get version tag <<< "$payload")"
 app="$(get version app <<< "$payload")"

@@ -42,3 +42,7 @@ clone () {
     git clone --quiet "$uri" "$destination"
     git -C "$destination" checkout --quiet "$branch"
 }
+
+log () {
+    >&2 echo "$@"
+}
