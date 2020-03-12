@@ -33,7 +33,7 @@ jobs:
 
 - name: bump-version-playground
   plan:
-  - put: version
+  - get: version
     resource: test-repo-kustomize-version
   - task: cat-result
     config:
@@ -52,11 +52,9 @@ jobs:
         - |-
           cat version/tag
           cat version/app
-
-- name: get-version-playground
-  plan:
-  - get: test-repo-kustomize-version
-    trigger: true
+  - put: test-repo-kustomize-version
+    params:
+      file: version/tag
 
 resources:
 
@@ -74,6 +72,7 @@ resources:
     branch: master
     uri: git@github.com:boclips/kustomize-version-resource-test-repo.git
     private_key: ((kustomize-version-resource-test-repo.repo-key))
+    kustomization_yaml_path: k8s/base/kustomization.yaml
 
 - name: version
   type: semver

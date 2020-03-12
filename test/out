@@ -30,7 +30,7 @@ assert_equal_json \
        source: { uri: "/tmp/remote-repo-v123",
                  branch: "master",
                  private_key: "unused" },
-       params: { file: "/tmp/version-file" }
+       params: { file: "version-file" }
      }')"
 
 it "pushes the referenced version"

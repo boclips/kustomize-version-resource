@@ -16,15 +16,14 @@ uri="${config['uri']}"
 branch="${config['branch']}"
 private_key="${config['private_key']}"
 kustomization_yaml_path="${config['kustomization_yaml_path']}"
-
-clone "$uri" /tmp/repo "$branch" "$private_key"
-
-cd /tmp/repo
-
 version="$(cat "${config['file']}")"
-app="$("$cwd/parse-app" "$kustomization_yaml_path")"
+clone_dir=/tmp/repo
 
-cd "$(dirname "$kustomization_yaml_path")"
+clone "$uri" "$clone_dir" "$branch" "$private_key"
+
+app="$("$cwd/parse-app" "$clone_dir/$kustomization_yaml_path")"
+
+cd "$clone_dir/$(dirname "$kustomization_yaml_path")"
 
 kustomize edit set image "app=eu.gcr.io/boclips-prod/boclips/$app:$version"
 kustomize edit add annotation --force "boclips-version:$version"
