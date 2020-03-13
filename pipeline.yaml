@@ -71,7 +71,6 @@ resources:
   type: kustomize-version
   icon: github-circle
   source:
-    branch: master
     uri: git@github.com:boclips/kustomize-version-resource-test-repo.git
     private_key: ((kustomize-version-resource-test-repo.repo-key))
     kustomization_yaml_path: k8s/base/kustomization.yaml
@@ -100,4 +99,4 @@ resource_types:
   type: registry-image
   source:
     repository: boclipsconcourse/kustomize-version-resource
-    tag: 0.18.0
+    tag: 0.21.0
