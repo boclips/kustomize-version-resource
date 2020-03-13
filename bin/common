@@ -21,8 +21,7 @@ validate_payload () {
 clone () {
     uri="$1"
     destination="$2"
-    branch="$3"
-    private_key="$4"
+    private_key="$3"
 
     mkdir --parents ~/.ssh
     ssh-keyscan github.com \
@@ -40,8 +39,6 @@ clone () {
         log "Cloning the repo"
         git clone --quiet "$uri" "$destination"
     fi
-
-    git -C "$destination" checkout --quiet "$branch"
 }
 
 log () {

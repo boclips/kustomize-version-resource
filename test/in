@@ -19,7 +19,6 @@ non_bump_input="$(json '
 {
     source: {
         uri: "/tmp/remote-repo-v123",
-        branch: "master",
         private_key: "unused",
         kustomization_yaml_path: "k8s/base/kustomization.yaml"
     },
@@ -49,7 +48,6 @@ bump_input="$(json '
 {
     source: {
         uri: "/tmp/remote-repo-v123",
-        branch: "master",
         private_key: "unused",
         kustomization_yaml_path: "k8s/base/kustomization.yaml"
     },

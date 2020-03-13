@@ -19,7 +19,6 @@ assert_equal_json \
     "$(start_container "$container_id" '{
         source: {
             uri: "/tmp/remote-repo-v1",
-            branch: "master",
             private_key: "something",
             kustomization_yaml_path: "k8s/base/kustomization.yaml"
         }
@@ -44,7 +43,6 @@ assert_equal_json \
     "$(start_container "$container_id" '{
         source: {
             uri: "/tmp/remote-repo-v1",
-            branch: "master",
             private_key: "something",
             kustomization_yaml_path: "k8s/base/kustomization.yaml"
         },
@@ -67,12 +65,10 @@ input="$(
 jq \
     --null-input \
     --arg uri "$uri" \
-    --arg branch master \
     --arg private_key "$private_key" \
     '{
        source: {
          uri: $uri,
-         branch: $branch,
          private_key: $private_key,
          kustomization_yaml_path: "k8s/gateway/base/kustomization.yaml"
        },
@@ -96,4 +92,4 @@ assert_equal_json '
   { tag: "10", app: "gateway" }
 ]
 ' \
-    "$(run /opt/resource/check "$input" | jq '.[0:10]')"
+    "$(run /opt/resource/check "$input" 2> /dev/null | jq '.[0:10]')"

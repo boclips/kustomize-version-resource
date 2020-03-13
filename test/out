@@ -30,7 +30,6 @@ assert_equal_json \
     "$(start_container "$container_id" \
     '{
        source: { uri: "/tmp/remote-repo-v123",
-                 branch: "master",
                  private_key: "unused",
                  kustomization_yaml_path: "k8s/base/kustomization.yaml"
                },

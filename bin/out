@@ -16,14 +16,13 @@ validate_payload "$payload"
 resources_root=$1
 
 uri="$(get source uri <<< "$payload")"
-branch="$(get source branch <<< "$payload")"
 private_key="$(get source private_key <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 version_file="$(get params file <<< "$payload")"
 version="$(cat "$resources_root/$version_file")"
 clone_dir=/tmp/repo
 
-clone "$uri" "$clone_dir" "$branch" "$private_key"
+clone "$uri" "$clone_dir" "$private_key"
 
 app="$("$cwd/parse-app" "$clone_dir/$kustomization_yaml_path")"
 

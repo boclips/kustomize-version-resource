@@ -10,12 +10,10 @@ payload="$(cat)"
 validate_payload "$payload"
 
 uri="$(get source uri <<< "$payload")"
-branch="$(get source branch <<< "$payload")"
 private_key="$(get source private_key <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 input_tag="$(get version tag <<< "$payload")"
-
-clone "$uri" /tmp/repo "$branch" "$private_key"
+clone "$uri" /tmp/repo "$private_key"
 
 current_tag="$("$cwd/parse-version" "/tmp/repo/$kustomization_yaml_path")"
 app="$("$cwd/parse-app" "/tmp/repo/$kustomization_yaml_path")"
