@@ -46,10 +46,10 @@ new_yaml="$(cat "$dir/pulled-changes/k8s/base/kustomization.yaml")"
 if echo "$new_yaml" | grep -q 'newTag: "124"' \
     && echo "$new_yaml" | grep -q 'boclips-version: "124"'
 then
-    echo "Test passed"
+    green "Test passed"
     echo
 else
-    echo "Test failed"
+    red "Test failed"
     echo
     echo "Expected to find the 124 tag in:"
     echo "$new_yaml"

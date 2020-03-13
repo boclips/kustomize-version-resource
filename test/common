@@ -43,13 +43,21 @@ assert_equal_json () {
     assert_equal "$lhs" "$rhs"
 }
 
+green () {
+    echo "$(tput setaf 2)$*$(tput sgr0)"
+}
+
+red () {
+    echo "$(tput setaf 1)$*$(tput sgr0)"
+}
+
 assert_equal () {
     if [ "$1" == "$2" ]
     then
-        echo "Test passed"
+        green "Test passed"
         echo
     else
-        echo "Test failed"
+        red "Test failed"
         echo
         echo "Expected output:"
         echo "$1"
