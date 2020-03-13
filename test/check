@@ -23,13 +23,18 @@ assert_equal_json \
             private_key: "something",
             kustomization_yaml_path: "k8s/base/kustomization.yaml"
         }
-    }')"
+    }' 2> "$dir/stderr")"
+
+it "logs that git will clone when using a new container"
+assert_equal \
+    'Cloning the repo' \
+    "$(cat "$dir/stderr")"
 
 it "produces multiple versions, given a prior version, on future runs"
-commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:2"  "$dir"
-commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:3"  "$dir"
-commit_image "app=eu.gcr.io/boclips-prod/boclips/changed-app:4"  "$dir"
-copy_kustomize_repo "$dir" "$container_id" remote-repo-v2
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:2" "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:3" "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/changed-app:4" "$dir"
+copy_kustomize_repo "$dir" "$container_id" remote-repo-v1
 
 assert_equal_json \
     '[ { tag: "2", app: "changed-app"},
@@ -38,13 +43,18 @@ assert_equal_json \
      ]' \
     "$(start_container "$container_id" '{
         source: {
-            uri: "/tmp/remote-repo-v2",
+            uri: "/tmp/remote-repo-v1",
             branch: "master",
             private_key: "something",
             kustomization_yaml_path: "k8s/base/kustomization.yaml"
         },
         version: { tag: "2", app: "my-app" }
-    }')"
+    }' 2> "$dir/stderr")"
+
+it "logs that git will pull an existing repo"
+assert_equal \
+    'Pulling in existing repo' \
+    "$(cat "$dir/stderr")"
 
 rm -rf "$dir"
 docker rm "$container_id" > /dev/null

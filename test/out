@@ -35,7 +35,7 @@ assert_equal_json \
                  kustomization_yaml_path: "k8s/base/kustomization.yaml"
                },
        params: { file: "version-file" }
-     }')"
+     }' 2> /dev/null)"
 
 it "pushes the referenced version"
 

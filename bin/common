@@ -32,8 +32,15 @@ clone () {
 
     chmod 0400 ~/.ssh/id_rsa
 
-    rm -rf "$destination"
-    git clone --quiet "$uri" "$destination"
+    if [ -d "$destination" ]
+    then
+        log "Pulling in existing repo"
+        git -C "$destination" pull --quiet
+    else
+        log "Cloning the repo"
+        git clone --quiet "$uri" "$destination"
+    fi
+
     git -C "$destination" checkout --quiet "$branch"
 }
 

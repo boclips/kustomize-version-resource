@@ -102,5 +102,7 @@ copy_kustomize_repo () {
     container_id=$2
     destination=$3
 
-    docker cp -a "$dir/remote-repo" "$container_id:/tmp/$destination"
+    cp -a "$dir/remote-repo" "$dir/$destination"
+    docker cp -a "$dir/$destination" "$container_id:/tmp/"
+    rm -rf "${dir:?}/$destination"
 }
