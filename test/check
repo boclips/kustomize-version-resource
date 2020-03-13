@@ -6,50 +6,48 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-(
-    container_id="$(create /opt/resource/check)"
-    dir=$(mktemp -d -t test-check.XXXXX)
+container_id="$(create /opt/resource/check)"
+dir=$(mktemp -d -t test-check.XXXXX)
 
-    it "produces a version on first run"
-    init_kustomize_repo "$dir"
-    commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:1" "$dir"
-    copy_kustomize_repo "$dir" "$container_id" remote-repo-v1
+it "produces a version on first run"
+init_kustomize_repo "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:1" "$dir"
+copy_kustomize_repo "$dir" "$container_id" remote-repo-v1
 
-    assert_equal_json \
-        '[ { tag:"1", app: "my-app" } ]' \
-        "$(start_container "$container_id" '{
-            source: {
-                uri: "/tmp/remote-repo-v1",
-                branch: "master",
-                private_key: "something",
-                kustomization_yaml_path: "k8s/base/kustomization.yaml"
-            }
-        }')"
+assert_equal_json \
+    '[ { tag:"1", app: "my-app" } ]' \
+    "$(start_container "$container_id" '{
+        source: {
+            uri: "/tmp/remote-repo-v1",
+            branch: "master",
+            private_key: "something",
+            kustomization_yaml_path: "k8s/base/kustomization.yaml"
+        }
+    }')"
 
-    it "produces multiple versions, given a prior version, on future runs"
-    commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:2"  "$dir"
-    commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:3"  "$dir"
-    commit_image "app=eu.gcr.io/boclips-prod/boclips/changed-app:4"  "$dir"
-    copy_kustomize_repo "$dir" "$container_id" remote-repo-v2
+it "produces multiple versions, given a prior version, on future runs"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:2"  "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:3"  "$dir"
+commit_image "app=eu.gcr.io/boclips-prod/boclips/changed-app:4"  "$dir"
+copy_kustomize_repo "$dir" "$container_id" remote-repo-v2
 
-    assert_equal_json \
-        '[ { tag: "2", app: "changed-app"},
-           { tag: "3", app: "changed-app"},
-           { tag: "4", app: "changed-app"}
-         ]' \
-        "$(start_container "$container_id" '{
-            source: {
-                uri: "/tmp/remote-repo-v2",
-                branch: "master",
-                private_key: "something",
-                kustomization_yaml_path: "k8s/base/kustomization.yaml"
-            },
-            version: { tag: "2", app: "my-app" }
-        }')"
+assert_equal_json \
+    '[ { tag: "2", app: "changed-app"},
+       { tag: "3", app: "changed-app"},
+       { tag: "4", app: "changed-app"}
+     ]' \
+    "$(start_container "$container_id" '{
+        source: {
+            uri: "/tmp/remote-repo-v2",
+            branch: "master",
+            private_key: "something",
+            kustomization_yaml_path: "k8s/base/kustomization.yaml"
+        },
+        version: { tag: "2", app: "my-app" }
+    }')"
 
-    rm -rf "$dir"
-    docker rm "$container_id" > /dev/null
-)
+rm -rf "$dir"
+docker rm "$container_id" > /dev/null
 
 it "successfully checks GitHub repo"
 uri="git@github.com:boclips/release-manifests.git"
