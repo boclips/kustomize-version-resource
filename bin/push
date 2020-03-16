@@ -2,35 +2,47 @@
 
 set -e
 
+rebase_push () {
+    local repository=$1
+
+    log "Rebasing"
+    git -C "$repository" pull --rebase 1>&2 \
+        || return 1
+
+    log "Pushing"
+    git -C "$repository" push 1>&2 \
+        || return 1
+}
+
 cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
+success_marker=/tmp/push_success
 repo=$1
-pipe_trigger=$2
+try=$2
 try_limit=$3
-tries=0
 
-log "Will try to rebase and push $try_limit times"
+if [ "$try" = 1 ]
+then
+    rm -f "$success_marker"
+elif [ -e "$success_marker" ]
+then
+    log "Skipping try $try of $try_limit because we already pushed"
+    exit 0
+fi
 
-until [ $tries = "$try_limit" ]
-do
-    log
-    log "Try $(( ++tries ))"
+log
+log "Try $try of $try_limit"
 
-    log -n "Waiting for trigger... "
-    trigger="$(cat "$pipe_trigger")"
-    log "got: $trigger"
-
-    log "Rebasing"
-    git -C "$repo" pull --quiet --rebase
-
-    log "Pushing"
-
-    if git -C "$repo" push
-    then
-        break
-    else
-        log "Push failed"
-    fi
-done
+if rebase_push "$repo"
+then
+    touch "$success_marker"
+    log "Success!"
+elif [ "$try" -lt "$try_limit" ]
+then
+    log "Will try again, because this was try $try of $try_limit"
+else
+    log "Push failed. Giving up because this was try $try of $try_limit"
+    exit 1
+fi

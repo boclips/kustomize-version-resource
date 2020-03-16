@@ -18,19 +18,13 @@ tidy () {
 
 trap tidy EXIT
 
-it "rebases until successful"
+it "rebases before push"
 
 init_kustomize_repo "$dir1"
 git -C "$dir1/local-repo" add .
 git -C "$dir1/local-repo" commit --quiet --message "initial"
 push_kustomize_repo "$dir1"
 commit_image "my-app:1" "$dir1"
-
-mkfifo "$dir1/pipe"
-try_limit=10
-$push "$dir1/local-repo" "$dir1/pipe" "$try_limit" \
-    2> /dev/null \
-    &
 
 git clone --quiet "$dir1/remote-repo" "$dir2/local-repo" \
     2> /dev/null
@@ -41,22 +35,16 @@ git -C "$dir2/local-repo" commit \
     --message "engineer commit"
 push_kustomize_repo "$dir2"
 
-echo try-once-please > "$dir1/pipe"
+try_limit=3
+$push "$dir1/local-repo" 1 "$try_limit" > /dev/null 2>&1
 
-git -C "$dir2/local-repo" commit \
-    --quiet \
-    --allow-empty \
-    --message "another engineer commit"
-push_kustomize_repo "$dir2"
-
-echo try-again-please > "$dir1/pipe"
-
-wait
+# these should be no-ops, because try 1 succeeded
+$push "$dir1/local-repo" 2 "$try_limit" > /dev/null 2>&1
+$push "$dir1/local-repo" 3 "$try_limit" > /dev/null 2>&1
 
 git clone --quiet "$dir1/remote-repo" "$dir1/local-repo-assert"
 assert_equal \
 'bump to my-app:1
-another engineer commit
 engineer commit
 initial' \
     "$(git -C "$dir1/local-repo-assert" log --pretty=format:%s)"
@@ -68,26 +56,23 @@ init_kustomize_repo "$dir3"
 git -C "$dir3/local-repo" add .
 git -C "$dir3/local-repo" commit --quiet --message "initial"
 push_kustomize_repo "$dir3"
-commit_image "app=unpushed-line:1" "$dir3"
-
-mkfifo "$dir3/pipe"
-try_limit=1
-$push "$dir3/local-repo" "$dir3/pipe" "$try_limit" \
-    > /dev/null 2>&1 \
-    &
+commit_image "app=my-app:1" "$dir3"
 
 git clone --quiet "$dir3/remote-repo" "$dir4/local-repo" \
     2> /dev/null
 
-commit_image "app=conflicting-line:42" "$dir4"
+commit_image "app=conflicting-image:1" "$dir4"
 push_kustomize_repo "$dir4"
 
-echo get-some-merge-conflicts > "$dir3/pipe"
+try_limit=2
+exit_codes=""
 
-wait
+$push "$dir3/local-repo" 1 "$try_limit" \
+    > /dev/null 2>&1
+exit_codes+=$?
 
-git clone --quiet "$dir3/remote-repo" "$dir3/local-repo-assert"
-assert_equal \
-'bump to app=conflicting-line:42
-initial' \
-    "$(git -C "$dir3/local-repo-assert" log --pretty=format:%s)"
+$push "$dir3/local-repo" 2 "$try_limit" \
+    > /dev/null 2>&1 \
+    || exit_codes+=$?
+
+assert_equal "01" "$exit_codes"

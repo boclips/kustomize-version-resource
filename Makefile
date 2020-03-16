@@ -5,5 +5,5 @@ test: test_image_id
 	test/out
 	test/check
 
-test_image_id: Dockerfile bin/in bin/out bin/check bin/common
+test_image_id: Dockerfile bin/in bin/out bin/check bin/common bin/push
 	docker build --quiet --iidfile $@ .
