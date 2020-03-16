@@ -1,5 +1,6 @@
 .PHONY: test
 test: test_image_id
+	test/push
 	test/in
 	test/out
 	test/check

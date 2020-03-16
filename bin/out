@@ -2,6 +2,19 @@
 
 set -e
 
+trigger_with_delay_seconds () {
+    local limit=$1
+    local delay=$2
+    local path=$3
+    (
+    for n in $(seq 1 "$limit")
+    do
+        echo "trigger$n" > "$path"
+        sleep "$delay"
+    done
+    ) &
+}
+
 cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
@@ -10,6 +23,8 @@ export GIT_COMMITTER_NAME=Kustomizer
 export GIT_COMMITTER_EMAIL=engineering@boclips.com
 
 payload="$(cat)"
+push="$cwd/push"
+try_limit=5
 
 validate_payload "$payload"
 
@@ -38,7 +53,12 @@ git \
   --author="$GIT_COMMITTER_NAME <$GIT_COMMITTER_EMAIL>" \
   --message="Bump $app version to $version"
 
-git push --quiet
+pipe_path=/tmp/push_pipe
+mkfifo "$pipe_path"
+
+trigger_with_delay_seconds "$try_limit" 1 "$pipe_path"
+
+$push "$clone_dir" "$pipe_path" "$try_limit"
 
 jq \
     --null-input \

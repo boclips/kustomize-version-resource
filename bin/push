@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+
+cwd="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck disable=SC1090
+source "$cwd/common"
+
+repo=$1
+pipe_trigger=$2
+try_limit=$3
+tries=0
+
+log "Will try to rebase and push $try_limit times"
+
+until [ $tries = "$try_limit" ]
+do
+    log
+    log "Try $(( ++tries ))"
+
+    log -n "Waiting for trigger... "
+    trigger="$(cat "$pipe_trigger")"
+    log "got: $trigger"
+
+    log "Rebasing"
+    git -C "$repo" pull --quiet --rebase
+
+    log "Pushing"
+
+    if git -C "$repo" push
+    then
+        break
+    else
+        log "Push failed"
+    fi
+done
