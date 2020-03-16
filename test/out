@@ -14,6 +14,7 @@ it "emits the pushed version"
 
 init_kustomize_repo "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
+push_kustomize_repo "$dir"
 copy_kustomize_repo "$dir" "$container_id" remote-repo-v123
 
 echo 124 > "$dir/version-file"

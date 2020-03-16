@@ -12,6 +12,7 @@ dir=$(mktemp -d -t test-check.XXXXX)
 it "produces a version on first run"
 init_kustomize_repo "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:1" "$dir"
+push_kustomize_repo "$dir"
 copy_kustomize_repo "$dir" "$container_id" remote-repo-v1
 
 assert_equal_json \
@@ -33,6 +34,7 @@ it "produces multiple versions, given a prior version, on future runs"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:2" "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:3" "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/changed-app:4" "$dir"
+push_kustomize_repo "$dir"
 copy_kustomize_repo "$dir" "$container_id" remote-repo-v1
 
 assert_equal_json \

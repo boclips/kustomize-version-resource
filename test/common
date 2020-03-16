@@ -92,9 +92,13 @@ commit_image () {
         cd "$dir/local-repo/k8s/base"
         kustomize edit set image "$image"
         git add .
-        git commit --quiet --message=bump
-        git push --quiet
+        git commit --quiet --message="bump to $image"
     )
+}
+
+push_kustomize_repo () {
+    dir=$1
+    git -C "$dir/local-repo" push --quiet
 }
 
 copy_kustomize_repo () {

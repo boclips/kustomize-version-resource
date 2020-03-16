@@ -11,6 +11,7 @@ container_id="$(create /opt/resource/in $concourse_writeable_dir)"
 dir=$(mktemp -d -t test-in.XXXXX)
 init_kustomize_repo "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
+push_kustomize_repo "$dir"
 copy_kustomize_repo "$dir" "$container_id" remote-repo-v123
 
 it "emits an unbumped tag"
