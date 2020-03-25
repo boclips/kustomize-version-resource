@@ -4,37 +4,28 @@ set -e
 
 cwd="$(cd "$(dirname "$0")" && pwd)"
 
+resource_output_dir () {
+    local dir=/tmp/kustomize-version-resource-output
+    mkdir --parents "$dir"
+    echo "$dir"
+}
+
 it () {
     echo "$@"
 }
 
-create () {
-    image_id="$(cat "$cwd/../test_image_id")"
-    docker create \
-        --interactive \
-        --entrypoint="$1" \
-        "$image_id" \
-        "${@:2}"
-}
-
-start_container () {
-    container_id="$1"
+run () {
+    cmd="$cwd/../bin/$1"
     input="$(json "$2")"
-    docker start \
-        --interactive \
-        "$container_id" \
-        <<< "$input"
+    dir=$3
+    (
+    cd "$dir"
+    $cmd "$(resource_output_dir)" <<< "$input"
+    )
 }
 
 json () {
     jq --null-input "$@"
-}
-
-run () {
-    entrypoint="$1"
-    input="$2"
-    container_id="$(create "$entrypoint" "${@:3}")"
-    start_container "$container_id" "$input"
 }
 
 assert_equal_json () {

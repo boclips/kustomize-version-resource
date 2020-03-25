@@ -1,9 +1,6 @@
 .PHONY: test
-test: test_image_id
+test:
 	test/push
 	test/in
 	test/out
 	test/check
-
-test_image_id: Dockerfile bin/in bin/out bin/check bin/common bin/push
-	docker build --quiet --iidfile $@ .

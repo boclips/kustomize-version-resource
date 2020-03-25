@@ -6,19 +6,16 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-concourse_writeable_dir=/root
-container_id="$(create /opt/resource/out "$concourse_writeable_dir")"
 dir=$(mktemp -d -t test-out.XXXXX)
+rm -rf /tmp/kustomize-version-resource
 
 it "emits the pushed version"
 
 init_kustomize_repo "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
 push_kustomize_repo "$dir"
-copy_kustomize_repo "$dir" "$container_id" remote-repo-v123
 
-echo 124 > "$dir/version-file"
-docker cp "$dir/version-file" "$container_id:$concourse_writeable_dir"
+echo 124 > "$(resource_output_dir)/version-file"
 
 assert_equal_json \
     '{
@@ -28,19 +25,20 @@ assert_equal_json \
          { name: "app", value: "my-app" }
        ]
      }' \
-    "$(start_container "$container_id" \
+    "$(run out \
     '{
-       source: { uri: "/tmp/remote-repo-v123",
+       source: { uri: "'"$dir"'/remote-repo",
                  private_key: "unused",
                  kustomization_yaml_path: "k8s/base/kustomization.yaml"
                },
        params: { file: "version-file" }
-     }' 2> /dev/null)"
+     }' \
+    "$dir"
+    )"
 
 it "pushes the referenced version"
 
-docker cp -a "$container_id:/tmp/remote-repo-v123" "$dir/changed-bare-repo"
-git clone --quiet "$dir/changed-bare-repo" "$dir/pulled-changes"
+git clone --quiet "$dir/remote-repo" "$dir/pulled-changes"
 new_yaml="$(cat "$dir/pulled-changes/k8s/base/kustomization.yaml")"
 
 if echo "$new_yaml" | grep -q 'newTag: "124"' \
@@ -65,10 +63,9 @@ assert_equal \
 
 it "gives useful message when private key is unset"
 
-output="$(
-run \
-    /opt/resource/out \
+output="$(run out \
     '{ source: { uri: "git@github.com:boclips/kustomize-version-resource-test-repo" } }' \
+    "$dir" \
     2>&1 \
     || true
 )"

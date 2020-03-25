@@ -6,6 +6,8 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
+clone_dir=/tmp/kustomize-version-resource
+
 export GIT_COMMITTER_NAME=Kustomizer
 export GIT_COMMITTER_EMAIL=engineering@boclips.com
 
@@ -22,7 +24,6 @@ private_key="$(get source private_key <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 version_file="$(get params file <<< "$payload")"
 version="$(cat "$resources_root/$version_file")"
-clone_dir=/tmp/repo
 
 clone "$uri" "$clone_dir" "$private_key"
 

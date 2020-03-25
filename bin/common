@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+private_key_path=/tmp/clone_private_key
+
 get () {
     jq --raw-output ".$1.$2 // empty"
 }
@@ -18,26 +20,23 @@ validate_payload () {
     fi
 }
 
+wrapped_git () {
+    GIT_SSH_COMMAND="ssh -i $private_key_path" \
+        git "$@"
+}
+
 clone () {
     uri="$1"
     destination="$2"
-    private_key="$3"
-
-    mkdir --parents ~/.ssh
-    ssh-keyscan github.com \
-        > ~/.ssh/known_hosts \
-        2> /dev/null
-    echo "$private_key" > ~/.ssh/id_rsa
-
-    chmod 0400 ~/.ssh/id_rsa
+    echo "$3" > "$private_key_path"
 
     if [ -d "$destination" ]
     then
-        log "Pulling in existing repo"
-        git -C "$destination" pull --quiet
+        log "Pulling in existing repo, because $destination exists"
+        wrapped_git -C "$destination" pull --quiet
     else
         log "Cloning the repo"
-        git clone --quiet "$uri" "$destination"
+        wrapped_git clone --quiet "$uri" "$destination"
     fi
 }
 

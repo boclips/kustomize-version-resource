@@ -6,6 +6,9 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
+clone_dir=/tmp/kustomize-version-resource
+mkdir --parents "$clone_dir"
+
 payload="$(cat)"
 validate_payload "$payload"
 
@@ -13,10 +16,10 @@ uri="$(get source uri <<< "$payload")"
 private_key="$(get source private_key <<< "$payload")"
 kustomization_yaml_path="$(get source kustomization_yaml_path <<< "$payload")"
 input_tag="$(get version tag <<< "$payload")"
-clone "$uri" /tmp/repo "$private_key"
+clone "$uri" "$clone_dir/repo" "$private_key"
 
-current_tag="$("$cwd/parse-version" "/tmp/repo/$kustomization_yaml_path")"
-app="$("$cwd/parse-app" "/tmp/repo/$kustomization_yaml_path")"
+current_tag="$("$cwd/parse-version" "$clone_dir/repo/$kustomization_yaml_path")"
+app="$("$cwd/parse-app" "$clone_dir/repo/$kustomization_yaml_path")"
 to=$(( current_tag + 1 ))
 
 if [ -z "$input_tag" ]
