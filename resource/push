@@ -6,11 +6,11 @@ rebase_push () {
     local repository=$1
 
     log "Rebasing"
-    git -C "$repository" pull --rebase 1>&2 \
+    wrapped_git -C "$repository" pull --rebase 1>&2 \
         || return 1
 
     log "Pushing"
-    git -C "$repository" push 1>&2 \
+    wrapped_git -C "$repository" push 1>&2 \
         || return 1
 }
 
