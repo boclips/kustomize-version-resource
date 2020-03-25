@@ -49,7 +49,7 @@ clone () {
         if ! wrapped_git clone --quiet "$uri" "$destination"
         then
             log "Couldn't clone"
-            cat "$private_key_path"
+            log "$(cat private_key_path)"
             exit 1
         fi
     fi
