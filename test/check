@@ -6,7 +6,7 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-dir=$(mktemp -d -t test-check.XXXXX)
+dir=$(mktemp -d -t test-check.XXXXXX)
 
 clone_dir=/tmp/kustomize-version-resource
 rm -rf "$clone_dir"
@@ -64,13 +64,12 @@ rm -rf "${dir:?}/*" "$clone_dir"
 
 it "successfully checks GitHub repo"
 uri="git@github.com:boclips/release-manifests.git"
-private_key="$(bo show credential concourse-main boclips.release-manifests repo-key)"
 
 input="$(
 jq \
     --null-input \
     --arg uri "$uri" \
-    --arg private_key "$private_key" \
+    --arg private_key "${TEST_PRIVATE_KEY:?}" \
     '{
        source: {
          uri: $uri,
@@ -100,5 +99,4 @@ assert_equal_json '
     "$(run check \
     "$input" \
     "$dir" \
-    2> /dev/null \
     | jq '.[0:10]')"

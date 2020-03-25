@@ -29,6 +29,16 @@ clone () {
     uri="$1"
     destination="$2"
     echo "$3" > "$private_key_path"
+    chmod 0600 "$private_key_path"
+
+    mkdir --parents ~/.ssh
+    touch ~/.ssh/known_hosts
+    if ! grep -q github.com ~/.ssh/known_hosts
+    then
+        ssh-keyscan github.com \
+            >> ~/.ssh/known_hosts \
+            2> /dev/null
+    fi
 
     if [ -d "$destination" ]
     then

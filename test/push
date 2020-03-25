@@ -3,14 +3,14 @@
 set -e
 
 cwd="$(cd "$(dirname "$0")" && pwd)"
-push="$cwd/../bin/push"
+push="$cwd/../resource/push"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-dir1=$(mktemp -d -t test-push1.XXXXX)
-dir2=$(mktemp -d -t test-push2.XXXXX)
-dir3=$(mktemp -d -t test-push3.XXXXX)
-dir4=$(mktemp -d -t test-push4.XXXXX)
+dir1=$(mktemp -d -t test-push1.XXXXXX)
+dir2=$(mktemp -d -t test-push2.XXXXXX)
+dir3=$(mktemp -d -t test-push3.XXXXXX)
+dir4=$(mktemp -d -t test-push4.XXXXXX)
 
 tidy () {
     rm -rf "$dir1" "$dir2" "$dir3" "$dir4"
@@ -29,6 +29,8 @@ commit_image "my-app:1" "$dir1"
 git clone --quiet "$dir1/remote-repo" "$dir2/local-repo" \
     2> /dev/null
 
+git -C "$dir2/local-repo" config user.email an-engineer@boclips.com
+git -C "$dir2/local-repo" config user.name Avrono
 git -C "$dir2/local-repo" commit \
     --quiet \
     --allow-empty \

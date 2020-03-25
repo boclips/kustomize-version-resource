@@ -6,7 +6,7 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-dir=$(mktemp -d -t test-in.XXXXX)
+dir=$(mktemp -d -t test-in.XXXXXX)
 init_kustomize_repo "$dir"
 commit_image "app=eu.gcr.io/boclips-prod/boclips/my-app:123" "$dir"
 push_kustomize_repo "$dir"

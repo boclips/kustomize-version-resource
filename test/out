@@ -6,7 +6,7 @@ cwd="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck disable=SC1090
 source "$cwd/common"
 
-dir=$(mktemp -d -t test-out.XXXXX)
+dir=$(mktemp -d -t test-out.XXXXXX)
 rm -rf /tmp/kustomize-version-resource
 
 it "emits the pushed version"

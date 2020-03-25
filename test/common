@@ -15,7 +15,7 @@ it () {
 }
 
 run () {
-    cmd="$cwd/../bin/$1"
+    cmd="$cwd/../resource/$1"
     input="$(json "$2")"
     dir=$3
     (
@@ -83,6 +83,8 @@ commit_image () {
         cd "$dir/local-repo/k8s/base"
         kustomize edit set image "$image"
         git add .
+        git config user.email an-engineer@boclips.com
+        git config user.name Avrono
         git commit --quiet --message="bump to $image"
     )
 }
