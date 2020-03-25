@@ -7,29 +7,13 @@ jobs:
   - put: version
     params:
       bump: minor
-  - task: build-image
-    privileged: true
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source:
-          repository: vito/oci-build-task
-          tag: "0.1.0"
-      inputs:
-      - name: source
-      outputs:
-      - name: image
-      run:
-        path: build
-      caches:
-      - path: cache
-      params:
-        CONTEXT: source
   - put: dockerhub
     params:
+      build: source
       image: image/image.tar
       additional_tags: version/version
+      build_args:
+        test_private_key: ((release-manifests.repo-key))
 
 - name: bump-version-playground
   plan:
@@ -86,7 +70,7 @@ resources:
     private_key: ((versions.repo-key))
 
 - name: dockerhub
-  type: registry-image
+  type: docker-image
   icon: docker
   source:
     repository: boclipsconcourse/kustomize-version-resource
