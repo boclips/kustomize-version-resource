@@ -46,14 +46,14 @@ resources:
 
 - name: source
   type: git
-  icon: github-circle
+  icon: github
   source:
     branch: master
     uri: https://github.com/boclips/kustomize-version-resource.git
 
 - name: test-version
   type: kustomize-version
-  icon: github-circle
+  icon: github
   source:
     uri: git@github.com:boclips/kustomize-version-resource-test-repo.git
     private_key: ((kustomize-version-resource-test-repo.repo-key))
@@ -61,7 +61,7 @@ resources:
 
 - name: version
   type: semver
-  icon: github-circle
+  icon: github
   source:
     driver: git
     uri: git@github.com:boclips/versions.git
