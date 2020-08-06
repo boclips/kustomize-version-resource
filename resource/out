@@ -26,8 +26,10 @@ version_file="$(get params file <<< "$payload")"
 version="$(cat "$resources_root/$version_file")"
 
 clone "$uri" "$clone_dir" "$private_key"
+log "Successfully cloned $uri to $clone_dir"
 
 app="$("$cwd/parse-app" "$clone_dir/$kustomization_yaml_path")"
+log "Parsed app name as '$app'"
 
 cd "$clone_dir/$(dirname "$kustomization_yaml_path")"
 
