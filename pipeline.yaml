@@ -83,4 +83,4 @@ resource_types:
   type: registry-image
   source:
     repository: boclipsconcourse/kustomize-version-resource
-    tag: 0.32.0
+    tag: 0.33.0
