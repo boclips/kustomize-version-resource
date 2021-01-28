@@ -1,5 +1,5 @@
-FROM alpine:3.9.5 AS core
-ENV KUSTOMIZE_VERSION 3.5.4
+FROM alpine:3.13.0 AS core
+ENV KUSTOMIZE_VERSION 3.9.2
 RUN apk --update add \
     bash \
     git \
